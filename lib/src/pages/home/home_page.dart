@@ -56,7 +56,9 @@ class HomePage extends StatelessWidget {
   goToPlotPage(context) {
     Navigator.push(
       context,
-      CupertinoPageRoute(builder: (context) => PlotsPage()),
+      CupertinoPageRoute(
+        builder: (context) => PlotsPage(),
+      ),
     );
   }
 

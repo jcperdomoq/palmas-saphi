@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:las_palmas/models/home/category.dart';
+import 'package:las_palmas/src/providers/plants_provider.dart';
+import 'package:provider/provider.dart';
 
 class CategoryCard extends StatefulWidget {
   final Category category;
@@ -19,13 +21,30 @@ class _CategoryCardState extends State<CategoryCard> {
   }
 
   void onTap() {
-    setState(() {
-      selected = !selected;
-    });
+    final plantsProvider = Provider.of<PlantsProvider>(context, listen: false);
+    // setState(() {
+    //   selected = !selected;
+    // });
+    if (widget.category.name == 'Suelo' || widget.category.name == 'I+D') {
+      plantsProvider.categoryAreaSelected = widget.category;
+    } else {
+      plantsProvider.addCategoryEvaluationSelected(widget.category);
+    }
+  }
+
+  bool verifyCategorySelected() {
+    final plantsProvider = Provider.of<PlantsProvider>(context);
+    if (widget.category.name == 'Suelo' || widget.category.name == 'I+D') {
+      return plantsProvider.categoryAreaSelected == widget.category;
+    } else {
+      return plantsProvider.categoriesEvaluationSelected
+          .contains(widget.category);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    selected = verifyCategorySelected();
     return GestureDetector(
       onTap: onTap,
       child: Column(

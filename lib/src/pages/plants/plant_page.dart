@@ -1,14 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:las_palmas/models/plot/plot.dart';
+import 'package:las_palmas/src/providers/plants_provider.dart';
 import 'package:las_palmas/src/widgets/custom_buttom.dart';
+import 'package:provider/provider.dart';
 
 class PlantPage extends StatelessWidget {
+  final bool editable;
   final Plot plant;
-  const PlantPage({Key? key, required this.plant}) : super(key: key);
+  const PlantPage({
+    Key? key,
+    required this.plant,
+    this.editable = true,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final plantsProvider = Provider.of<PlantsProvider>(context);
+    final firstValidation = plantsProvider.containsForName('I+D') ||
+        plantsProvider.containsForName('Suelo') ||
+        plantsProvider.containsForName('Biometría');
+    final secondValidation = plantsProvider.containsForName('I+D') ||
+        plantsProvider.containsForName('Biometría');
     return Scaffold(
       backgroundColor: const Color(0xFFF5F4F4),
       appBar: buildAppbar(context),
@@ -50,15 +63,42 @@ class PlantPage extends StatelessWidget {
                   labelField(label: 'Campaña', value: '20'),
                   labelField(label: 'Linea', value: '1'),
                   labelField(label: 'Planta', value: '145'),
-                  labelField(label: 'Nª Verdes', value: 'Nª Verdes'),
-                  labelField(label: 'STP Ancho', value: 'STP Ancho'),
-                  labelField(label: 'STP Espesor', value: 'STP Espesor'),
-                  labelField(label: 'Nª Fololios', value: 'Nª Fololios'),
+                  if (firstValidation)
+                    labelField(label: 'Nª Verdes', value: 'Nª Verdes'),
+                  if (firstValidation)
+                    labelField(label: 'STP Ancho', value: 'STP Ancho'),
+                  if (firstValidation)
+                    labelField(label: 'STP Espesor', value: 'STP Espesor'),
+                  if (firstValidation)
+                    labelField(label: 'Nª Foliolos', value: 'Nª Fololios'),
+                  if (firstValidation)
+                    labelField(
+                        label: 'Largo Foliolos', value: 'Largo Foliolos'),
+                  if (firstValidation)
+                    labelField(
+                        label: 'Ancho Foliolos', value: 'Ancho Foliolos'),
+                  if (secondValidation)
+                    labelField(label: 'Long Peciolo', value: 'Long Peciolo'),
+                  if (secondValidation)
+                    labelField(label: 'Long Raquiz', value: 'Long Raquiz'),
+                  if (secondValidation)
+                    labelField(label: 'Altura Planta', value: 'Altura Planta'),
+                  if (secondValidation)
+                    labelField(label: 'Long Arqueo', value: 'Long Arqueo'),
+                  if (secondValidation)
+                    labelField(
+                        label: 'Circunferencia', value: 'Circunferencia'),
+                  if (firstValidation)
+                    labelField(
+                        label: 'Deficiencia Nutricional',
+                        value: 'Deficiencia Nutricional'),
+                  labelField(label: 'Observación', value: 'Observación'),
                   const SizedBox(height: 15),
-                  CustomButton(
-                    label: 'GUARDAR',
-                    onTap: () => save(context),
-                  ),
+                  if (editable)
+                    CustomButton(
+                      label: 'GUARDAR',
+                      onTap: () => save(context),
+                    ),
                 ],
               ),
             ),
@@ -96,19 +136,26 @@ class PlantPage extends StatelessWidget {
             child: Text(
               label,
               style: const TextStyle(
-                  color: Color(0xFF969696), fontWeight: FontWeight.w500),
+                color: Color(0xFF969696),
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
           Positioned(
             bottom: 14,
             left: 34,
             right: 10,
-            child: Text(
-              value,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+            child: TextField(
+              controller: TextEditingController(text: value),
+              enabled: editable,
               style: const TextStyle(
-                  color: Color(0xFF969696), fontWeight: FontWeight.w500),
+                color: Color(0xFF6E6E6E),
+              ),
+              decoration: const InputDecoration(
+                isDense: true,
+                contentPadding: EdgeInsets.symmetric(vertical: 0),
+                border: InputBorder.none,
+              ),
             ),
           ),
         ],

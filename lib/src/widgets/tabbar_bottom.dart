@@ -20,7 +20,7 @@ class _TabbarBottomState extends State<TabbarBottom> {
 
   final List<Widget> _pageList = [
     HomePage(),
-    PlotsPage(showFilter: true),
+    PlotsPage(showFilter: true, editable: false),
     const SynchronizationPage(),
     const ConfigurationPage(),
   ];

@@ -7,6 +7,7 @@ import 'package:las_palmas/src/widgets/search.dart';
 
 class PlotsPage extends StatelessWidget {
   final bool showFilter;
+  final bool editable;
   final Map<String, List<Plot>> plots = {
     'Parcela BCARD': [
       Plot('Planta Linea 1, Planta 145', const Color(0xFFF92B77)),
@@ -23,7 +24,8 @@ class PlotsPage extends StatelessWidget {
     ]
   };
 
-  PlotsPage({Key? key, this.showFilter = false}) : super(key: key);
+  PlotsPage({Key? key, this.showFilter = false, this.editable = true})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +128,7 @@ class PlotsPage extends StatelessWidget {
   openDetailPlant(BuildContext context, Plot plant) {
     Navigator.of(context).push(
       CupertinoPageRoute(
-        builder: (context) => PlantPage(plant: plant),
+        builder: (context) => PlantPage(plant: plant, editable: editable),
       ),
     );
   }
