@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:las_palmas/models/plot/plot.dart';
 import 'package:las_palmas/src/pages/plants/plant_page.dart';
+import 'package:las_palmas/src/providers/plants_provider.dart';
 import 'package:las_palmas/src/widgets/search.dart';
+import 'package:provider/provider.dart';
 
 class PlotsPage extends StatelessWidget {
   final bool showFilter;
   final bool editable;
-  final Map<String, List<Plot>> plots = {
+  final Map<String, List<Plot>> localPlots = {
     'Parcela BCARD': [
       Plot('Planta Linea 1, Planta 145', const Color(0xFFF92B77)),
       Plot('Planta Linea 2, Planta 146', const Color(0xFF00C347)),
@@ -29,6 +31,9 @@ class PlotsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final plantsProvider = Provider.of<PlantsProvider>(context);
+
+    final plots = editable ? localPlots : plantsProvider.plotReports;
     return Scaffold(
       backgroundColor: showFilter ? Colors.white : const Color(0xFFF5F4F4),
       appBar: showFilter ? null : buildAppbar(context),
@@ -70,7 +75,7 @@ class PlotsPage extends StatelessWidget {
                                     : const Color(0xFFF92B77),
                               ),
                               const SizedBox(height: 10),
-                              listPlots(key),
+                              listPlots(key, plots),
                             ],
                           );
                         },
@@ -100,7 +105,7 @@ class PlotsPage extends StatelessWidget {
     );
   }
 
-  ListView listPlots(String key) {
+  ListView listPlots(String key, Map<String, List<Plot>> plots) {
     return ListView.builder(
       itemCount: plots[key]?.length,
       shrinkWrap: true,
@@ -112,11 +117,11 @@ class PlotsPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             labelCard(
-              label: plot.label,
+              label: plot.label!,
               verticalPadding: 5,
               color: plot.color,
               width: MediaQuery.of(context).size.width * 0.8,
-              onTap: () => openDetailPlant(context, plot),
+              onTap: () => openDetailPlant(context, plot, key),
             ),
             const SizedBox(height: 10),
           ],
@@ -125,10 +130,11 @@ class PlotsPage extends StatelessWidget {
     );
   }
 
-  openDetailPlant(BuildContext context, Plot plant) {
+  openDetailPlant(BuildContext context, Plot plant, String categoryLabel) {
     Navigator.of(context).push(
       CupertinoPageRoute(
-        builder: (context) => PlantPage(plant: plant, editable: editable),
+        builder: (context) => PlantPage(
+            plant: plant, editable: editable, categoryLabel: categoryLabel),
       ),
     );
   }

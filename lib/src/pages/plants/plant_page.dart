@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:las_palmas/models/cache/cache_key.dart';
 import 'package:las_palmas/models/plot/plot.dart';
 import 'package:las_palmas/src/providers/plants_provider.dart';
 import 'package:las_palmas/src/widgets/custom_buttom.dart';
@@ -8,8 +11,10 @@ import 'package:provider/provider.dart';
 class PlantPage extends StatelessWidget {
   final bool editable;
   final Plot plant;
+  final String categoryLabel;
   const PlantPage({
     Key? key,
+    required this.categoryLabel,
     required this.plant,
     this.editable = true,
   }) : super(key: key);
@@ -43,7 +48,7 @@ class PlantPage extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    plant.label.replaceFirst('Planta', '').trim(),
+                    plant.label!.replaceFirst('Planta', '').trim(),
                     style: const TextStyle(
                       color: Color(0xFF676767),
                       fontSize: 20,
@@ -108,7 +113,28 @@ class PlantPage extends StatelessWidget {
     );
   }
 
-  void save(BuildContext context) {
+  void save(BuildContext context) async {
+    final plantsProvider = Provider.of<PlantsProvider>(context, listen: false);
+
+    await plantsProvider.loadPlotReports();
+    final reports = plantsProvider.plotReports;
+    if (reports.isEmpty) {
+      reports[categoryLabel] = [plant];
+    } else {
+      if (reports[categoryLabel] == null) {
+        reports[categoryLabel] = [plant];
+      } else {
+        reports[categoryLabel]!.add(plant);
+      }
+    }
+
+    plantsProvider.saveData(
+      key: CacheKey.reports.toString(),
+      data: jsonEncode(
+        plantsProvider.encode(reports),
+      ),
+    );
+
     Navigator.of(context).pop();
   }
 

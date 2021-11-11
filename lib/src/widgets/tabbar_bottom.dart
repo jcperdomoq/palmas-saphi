@@ -5,7 +5,9 @@ import 'package:las_palmas/src/pages/configuration/configuration_page.dart';
 import 'package:las_palmas/src/pages/home/home_page.dart';
 import 'package:las_palmas/src/pages/plot/plots_page.dart';
 import 'package:las_palmas/src/pages/synchronization/synchronization_page.dart';
+import 'package:las_palmas/src/providers/plants_provider.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
+import 'package:provider/provider.dart';
 
 class TabbarBottom extends StatefulWidget {
   const TabbarBottom({Key? key}) : super(key: key);
@@ -36,6 +38,10 @@ class _TabbarBottomState extends State<TabbarBottom> {
     setState(() {
       _currentIndex = index;
     });
+
+    if (index == 1) {
+      Provider.of<PlantsProvider>(context, listen: false).refreshReports();
+    }
   }
 
   BottomNavigationBarItem itemTab(label, pathIcon, index) {
@@ -82,6 +88,7 @@ class _TabbarBottomState extends State<TabbarBottom> {
       body: PersistentTabView(
         context,
         screens: _pageList,
+        // stateManagement: false,
         navBarStyle: NavBarStyle.simple,
         controller: _tabController,
         backgroundColor: Colors.transparent,
@@ -95,28 +102,6 @@ class _TabbarBottomState extends State<TabbarBottom> {
           navBarItem('Configuración', 'assets/images/reports.svg', 3),
         ],
       ),
-      // body: PageView(
-      //   physics: const NeverScrollableScrollPhysics(),
-      //   controller: _pageController,
-      //   children: _pageList,
-      // ),
-      // bottomNavigationBar: BottomNavigationBar(
-      //   backgroundColor: Colors.white,
-      //   elevation: 0,
-      //   type: BottomNavigationBarType.fixed,
-      //   selectedItemColor: const Color(0xFF00C347),
-      //   unselectedItemColor: const Color(0xFF828282),
-      //   selectedFontSize: 12,
-      //   unselectedFontSize: 12,
-      //   onTap: _onItemTapped,
-      //   currentIndex: _currentIndex,
-      //   items: [
-      //     itemTab('Inicio', 'assets/images/home.svg', 0),
-      //     itemTab('Reportes', 'assets/images/reports.svg', 1),
-      //     itemTab('Sincronización', 'assets/images/synchronization.svg', 2),
-      //     itemTab('Configuración', 'assets/images/reports.svg', 3),
-      //   ],
-      // ),
     );
   }
 }
