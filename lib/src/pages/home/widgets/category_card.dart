@@ -35,7 +35,9 @@ class _CategoryCardState extends State<CategoryCard> {
   bool verifyCategorySelected() {
     final plantsProvider = Provider.of<PlantsProvider>(context);
     if (widget.category.name == 'Suelo' || widget.category.name == 'I+D') {
-      return plantsProvider.categoryAreaSelected == widget.category;
+      return (plantsProvider.categoryAreaSelected == widget.category) ||
+          (widget.category.name == 'Suelo' &&
+              plantsProvider.categoryAreaSelected == null);
     } else {
       return plantsProvider.categoriesEvaluationSelected
           .contains(widget.category);

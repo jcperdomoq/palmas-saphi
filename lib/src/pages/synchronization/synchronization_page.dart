@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:las_palmas/src/providers/plots_provider.dart';
 import 'package:las_palmas/src/widgets/error_internet_widget.dart';
+import 'package:provider/provider.dart';
 
 class SynchronizationPage extends StatefulWidget {
   const SynchronizationPage({Key? key}) : super(key: key);
@@ -13,6 +15,9 @@ class SynchronizationPage extends StatefulWidget {
 class _SynchronizationPageState extends State<SynchronizationPage> {
   // Solo para fines ilustrativos
   bool showErrorConnextionWidget = false;
+  String stateDownload = "OK";
+  String stateSeendForm = "OK";
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,6 +44,7 @@ class _SynchronizationPageState extends State<SynchronizationPage> {
   }
 
   Column synchronizationForm(BuildContext context) {
+    final plotsProvider = Provider.of<PlotsProvider>(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -48,7 +54,7 @@ class _SynchronizationPageState extends State<SynchronizationPage> {
           child: const Padding(
             padding: EdgeInsets.symmetric(horizontal: 30),
             child: Text(
-              'Datos sincronizandose .............',
+              'Datos sincronizandose',
               style: TextStyle(
                 color: Color(0xFF828282),
                 fontSize: 25,
@@ -69,13 +75,13 @@ class _SynchronizationPageState extends State<SynchronizationPage> {
                   Row(
                     children: [
                       label(
-                        'Descarga de reportes......',
+                        'Descarga de reportes',
                         const Color(0xFF828282),
                       ),
                       const Spacer(),
                       label(
-                        '(EN PROCESO)',
-                        const Color(0xFFFFC629),
+                        '(${stateDownload})',
+                        const Color(0xFF13D640),
                       ),
                     ],
                   ),
@@ -83,15 +89,26 @@ class _SynchronizationPageState extends State<SynchronizationPage> {
                   Row(
                     children: [
                       label(
-                        'Actualización de BD aplicación .....',
+                        'Actualización de BD aplicación',
                         const Color(0xFF828282),
                       ),
                       const Spacer(),
                       label(
-                        '(OK)',
+                        '(${stateSeendForm})',
                         const Color(0xFF13D640),
                       ),
                     ],
+                  ),
+                  const Spacer(),
+                  ElevatedButton(
+                    child: const Text('Sincronizar'),
+                    onPressed: () {},
+                  ),
+                  ElevatedButton(
+                    child: const Text('Descargar informacion'),
+                    onPressed: () {
+                      getPlots(plotsProvider);
+                    },
                   ),
                   const Spacer(),
                   const Padding(
@@ -123,5 +140,28 @@ class _SynchronizationPageState extends State<SynchronizationPage> {
         fontSize: 15,
       ),
     );
+  }
+
+  getPlots(PlotsProvider plotsProvider) {
+    setState(() {
+      stateDownload = "EN PROCESO";
+    });
+    plotsProvider.plotService.getPlots().then((value) {
+      print(value);
+      setState(() {
+        stateDownload = "OK";
+      });
+    }).catchError((onError) {
+      mensajeError();
+    });
+  }
+
+  mensajeError() async {
+    setState(() {
+      showErrorConnextionWidget = true;
+      stateDownload = "Error";
+    });
+    await Future.delayed(Duration(seconds: 5));
+    setState(() => showErrorConnextionWidget = false);
   }
 }

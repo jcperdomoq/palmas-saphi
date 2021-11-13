@@ -22,11 +22,13 @@ class PlantPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final plantsProvider = Provider.of<PlantsProvider>(context);
-    final firstValidation = plantsProvider.containsForName('I+D') ||
-        plantsProvider.containsForName('Suelo') ||
-        plantsProvider.containsForName('Biometría');
-    final secondValidation = plantsProvider.containsForName('I+D') ||
-        plantsProvider.containsForName('Biometría');
+
+    final isSuelo = plantsProvider.containsForName('Suelo');
+    final isID = plantsProvider.containsForName('I+D');
+    final isBiometrica = plantsProvider.containsForName('Biometría');
+    final isNutricional =
+        plantsProvider.containsForName('Deficiencia Nutricional');
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F4F4),
       appBar: buildAppbar(context),
@@ -66,34 +68,37 @@ class PlantPage extends StatelessWidget {
                   labelField(label: 'DNI Evaluador', value: '73177293'),
                   labelField(label: 'Parcela', value: 'BCARD'),
                   labelField(label: 'Campaña', value: '20'),
+                  if (isID) labelField(label: 'Ensayo', value: '1'),
+                  if (isID) labelField(label: 'Bloque', value: '1'),
+                  if (isID) labelField(label: 'Tratamiento', value: '1'),
                   labelField(label: 'Linea', value: '1'),
                   labelField(label: 'Planta', value: '145'),
-                  if (firstValidation)
+                  if (isBiometrica)
                     labelField(label: 'Nª Verdes', value: 'Nª Verdes'),
-                  if (firstValidation)
+                  if (isBiometrica)
                     labelField(label: 'STP Ancho', value: 'STP Ancho'),
-                  if (firstValidation)
+                  if (isBiometrica)
                     labelField(label: 'STP Espesor', value: 'STP Espesor'),
-                  if (firstValidation)
+                  if (isBiometrica)
                     labelField(label: 'Nª Foliolos', value: 'Nª Fololios'),
-                  if (firstValidation)
+                  if (isBiometrica)
                     labelField(
                         label: 'Largo Foliolos', value: 'Largo Foliolos'),
-                  if (firstValidation)
+                  if (isBiometrica)
                     labelField(
                         label: 'Ancho Foliolos', value: 'Ancho Foliolos'),
-                  if (secondValidation)
+                  if (isBiometrica && isID)
                     labelField(label: 'Long Peciolo', value: 'Long Peciolo'),
-                  if (secondValidation)
+                  if (isBiometrica && isID)
                     labelField(label: 'Long Raquiz', value: 'Long Raquiz'),
-                  if (secondValidation)
+                  if (isBiometrica && isID)
                     labelField(label: 'Altura Planta', value: 'Altura Planta'),
-                  if (secondValidation)
+                  if (isBiometrica && isID)
                     labelField(label: 'Long Arqueo', value: 'Long Arqueo'),
-                  if (secondValidation)
+                  if (isBiometrica && isID)
                     labelField(
                         label: 'Circunferencia', value: 'Circunferencia'),
-                  if (firstValidation)
+                  if (isBiometrica)
                     labelField(
                         label: 'Deficiencia Nutricional',
                         value: 'Deficiencia Nutricional'),
