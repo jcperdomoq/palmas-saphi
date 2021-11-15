@@ -5,7 +5,7 @@ import 'package:las_palmas/src/pages/configuration/configuration_page.dart';
 import 'package:las_palmas/src/pages/home/home_page.dart';
 import 'package:las_palmas/src/pages/plot/plots_page.dart';
 import 'package:las_palmas/src/pages/synchronization/synchronization_page.dart';
-import 'package:las_palmas/src/providers/plants_provider.dart';
+import 'package:las_palmas/src/providers/plots_provider.dart';
 import 'package:persistent_bottom_nav_bar/persistent-tab-view.dart';
 import 'package:provider/provider.dart';
 
@@ -40,7 +40,7 @@ class _TabbarBottomState extends State<TabbarBottom> {
     });
 
     if (index == 1) {
-      Provider.of<PlantsProvider>(context, listen: false).refreshReports();
+      Provider.of<PlotsProvider>(context, listen: false).refreshReports();
     }
   }
 

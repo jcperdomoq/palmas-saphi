@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:las_palmas/src/providers/plots_provider.dart';
@@ -80,7 +81,7 @@ class _SynchronizationPageState extends State<SynchronizationPage> {
                       ),
                       const Spacer(),
                       label(
-                        '(${stateDownload})',
+                        stateDownload,
                         const Color(0xFF13D640),
                       ),
                     ],
@@ -94,7 +95,7 @@ class _SynchronizationPageState extends State<SynchronizationPage> {
                       ),
                       const Spacer(),
                       label(
-                        '(${stateSeendForm})',
+                        stateSeendForm,
                         const Color(0xFF13D640),
                       ),
                     ],
@@ -102,7 +103,7 @@ class _SynchronizationPageState extends State<SynchronizationPage> {
                   const Spacer(),
                   ElevatedButton(
                     child: const Text('Sincronizar'),
-                    onPressed: () {},
+                    onPressed: synchronization,
                   ),
                   ElevatedButton(
                     child: const Text('Descargar informacion'),
@@ -132,6 +133,12 @@ class _SynchronizationPageState extends State<SynchronizationPage> {
     );
   }
 
+  synchronization() {
+    final plotsProvider = Provider.of<PlotsProvider>(context, listen: false);
+    plotsProvider.clearReports();
+    plotsProvider.loadColorPlots([]);
+  }
+
   Text label(String label, Color color) {
     return Text(
       label,
@@ -146,14 +153,25 @@ class _SynchronizationPageState extends State<SynchronizationPage> {
     setState(() {
       stateDownload = "EN PROCESO";
     });
-    plotsProvider.plotService.getPlots().then((value) {
-      print(value);
-      setState(() {
-        stateDownload = "OK";
-      });
-    }).catchError((onError) {
-      mensajeError();
+
+    plotsProvider.loadPlotsFromServer().then((value) {
+      if (value == HttpStatus.ok) {
+        setState(() {
+          stateDownload = "OK";
+        });
+        plotsProvider.loadColorPlots(plotsProvider.plantReports);
+      } else {
+        mensajeError();
+      }
     });
+    // plotsProvider.plotService.getPlots().then((value) {
+    //   print(value);
+    //   setState(() {
+    //     stateDownload = "OK";
+    //   });
+    // }).catchError((onError) {
+    //   mensajeError();
+    // });
   }
 
   mensajeError() async {
@@ -161,7 +179,7 @@ class _SynchronizationPageState extends State<SynchronizationPage> {
       showErrorConnextionWidget = true;
       stateDownload = "Error";
     });
-    await Future.delayed(Duration(seconds: 5));
+    await Future.delayed(const Duration(seconds: 5));
     setState(() => showErrorConnextionWidget = false);
   }
 }

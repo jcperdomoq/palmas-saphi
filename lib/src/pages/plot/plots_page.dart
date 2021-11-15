@@ -1,9 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:las_palmas/models/api/plots.dart';
 import 'package:las_palmas/models/plot/plot.dart';
 import 'package:las_palmas/src/pages/plants/plant_page.dart';
-import 'package:las_palmas/src/providers/plants_provider.dart';
+import 'package:las_palmas/src/providers/plots_provider.dart';
 import 'package:las_palmas/src/widgets/search.dart';
 import 'package:provider/provider.dart';
 
@@ -31,9 +32,12 @@ class PlotsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final plantsProvider = Provider.of<PlantsProvider>(context);
+    final plotsProvider = Provider.of<PlotsProvider>(context);
 
-    final plots = editable ? localPlots : plantsProvider.plotReports;
+    final plots = editable ? plotsProvider.plots : plotsProvider.plantReports;
+    // if (!editable) {
+    //   plotsProvider.loadColorPlots(plots);
+    // }
     return Scaffold(
       backgroundColor: showFilter ? Colors.white : const Color(0xFFF5F4F4),
       appBar: showFilter ? null : buildAppbar(context),
@@ -59,15 +63,18 @@ class PlotsPage extends StatelessWidget {
                   child: Column(
                     children: [
                       const SizedBox(height: 30),
-                      ...plots.keys.map<Widget>(
-                        (key) {
-                          final plants = plots[key]!;
-                          final hasGreen = plants.indexWhere(
-                              (plot) => plot.color == const Color(0xFF00C347));
+                      ...plots.map<Widget>(
+                        (plot) {
+                          final plants = plot.plants;
+                          final hasGreen = !editable
+                              ? const Color(0xFF00C347)
+                              : plants.indexWhere((plot) =>
+                                  plot.color == const Color(0xFF00C347));
+                          // final hasGreen = !editable;
                           return Column(
                             children: [
                               labelCard(
-                                label: key,
+                                label: plot.name ?? '',
                                 verticalPadding: 16,
                                 width: double.infinity,
                                 color: hasGreen != -1
@@ -75,7 +82,7 @@ class PlotsPage extends StatelessWidget {
                                     : const Color(0xFFF92B77),
                               ),
                               const SizedBox(height: 10),
-                              listPlots(key, plots),
+                              listPlots(plot, plants),
                             ],
                           );
                         },
@@ -105,23 +112,25 @@ class PlotsPage extends StatelessWidget {
     );
   }
 
-  ListView listPlots(String key, Map<String, List<Plot>> plots) {
+  ListView listPlots(Plots plot, List<Plant> plants) {
     return ListView.builder(
-      itemCount: plots[key]?.length,
+      itemCount: plants.length,
       shrinkWrap: true,
       padding: const EdgeInsets.only(bottom: 10),
       physics: const NeverScrollableScrollPhysics(),
       itemBuilder: (context, index) {
-        final plot = plots[key]![index];
+        final plant = plants[index];
         return Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             labelCard(
-              label: plot.label!,
+              label: 'Linea ${plant.line}, Planta ${plant.plant}',
               verticalPadding: 5,
-              color: plot.color,
+              color: !editable
+                  ? const Color(0xFF00C347)
+                  : plant.color ?? const Color(0xFFF92B77),
               width: MediaQuery.of(context).size.width * 0.8,
-              onTap: () => openDetailPlant(context, plot, key),
+              onTap: () => openDetailPlant(context, plant, plot),
             ),
             const SizedBox(height: 10),
           ],
@@ -130,11 +139,14 @@ class PlotsPage extends StatelessWidget {
     );
   }
 
-  openDetailPlant(BuildContext context, Plot plant, String categoryLabel) {
+  openDetailPlant(BuildContext context, Plant plant, Plots plot) {
     Navigator.of(context).push(
       CupertinoPageRoute(
         builder: (context) => PlantPage(
-            plant: plant, editable: editable, categoryLabel: categoryLabel),
+          plant: plant,
+          editable: editable,
+          plot: plot,
+        ),
       ),
     );
   }

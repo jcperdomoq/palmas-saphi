@@ -2,19 +2,20 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:las_palmas/models/api/plots.dart';
 import 'package:las_palmas/models/cache/cache_key.dart';
-import 'package:las_palmas/models/plot/plot.dart';
 import 'package:las_palmas/src/providers/plants_provider.dart';
+import 'package:las_palmas/src/providers/plots_provider.dart';
 import 'package:las_palmas/src/widgets/custom_buttom.dart';
 import 'package:provider/provider.dart';
 
 class PlantPage extends StatelessWidget {
   final bool editable;
-  final Plot plant;
-  final String categoryLabel;
+  final Plant plant;
+  final Plots plot;
   const PlantPage({
     Key? key,
-    required this.categoryLabel,
+    required this.plot,
     required this.plant,
     this.editable = true,
   }) : super(key: key);
@@ -23,12 +24,8 @@ class PlantPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final plantsProvider = Provider.of<PlantsProvider>(context);
 
-    final isSuelo = plantsProvider.containsForName('Suelo');
     final isID = plantsProvider.containsForName('I+D');
     final isBiometrica = plantsProvider.containsForName('Biometría');
-    final isNutricional =
-        plantsProvider.containsForName('Deficiencia Nutricional');
-
     return Scaffold(
       backgroundColor: const Color(0xFFF5F4F4),
       appBar: buildAppbar(context),
@@ -50,7 +47,7 @@ class PlantPage extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    plant.label!.replaceFirst('Planta', '').trim(),
+                    'Linea ${plant.line}, Planta ${plant.plant}',
                     style: const TextStyle(
                       color: Color(0xFF676767),
                       fontSize: 20,
@@ -119,27 +116,30 @@ class PlantPage extends StatelessWidget {
   }
 
   void save(BuildContext context) async {
-    final plantsProvider = Provider.of<PlantsProvider>(context, listen: false);
+    final plotsProvider = Provider.of<PlotsProvider>(context, listen: false);
 
-    await plantsProvider.loadPlotReports();
-    final reports = plantsProvider.plotReports;
-    if (reports.isEmpty) {
-      reports[categoryLabel] = [plant];
-    } else {
-      if (reports[categoryLabel] == null) {
-        reports[categoryLabel] = [plant];
-      } else {
-        reports[categoryLabel]!.add(plant);
+    await plotsProvider.loadPlotReports();
+    final reports = plotsProvider.plantReports;
+    bool reportSaved = false;
+    for (final plotReport in reports) {
+      if (plot.id == plotReport.id) {
+        plotReport.plants.add(plant);
+        reportSaved = true;
       }
     }
+    if (!reportSaved) {
+      reports.add(Plots(
+        id: plot.id,
+        name: plot.name,
+        plants: [plant],
+      ));
+    }
 
-    plantsProvider.saveData(
+    plotsProvider.saveData(
       key: CacheKey.reports.toString(),
-      data: jsonEncode(
-        plantsProvider.encode(reports),
-      ),
+      data: jsonEncode(List<dynamic>.from(reports.map((x) => x.toJson()))),
     );
-
+    plotsProvider.loadColorPlots(reports);
     Navigator.of(context).pop();
   }
 
