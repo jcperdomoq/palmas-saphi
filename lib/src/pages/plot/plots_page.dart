@@ -5,7 +5,6 @@ import 'package:las_palmas/models/api/plots.dart';
 import 'package:las_palmas/models/plot/plot.dart';
 import 'package:las_palmas/src/pages/plants/plant_page.dart';
 import 'package:las_palmas/src/providers/plots_provider.dart';
-import 'package:las_palmas/src/widgets/search.dart';
 import 'package:provider/provider.dart';
 
 class PlotsPage extends StatelessWidget {
@@ -54,7 +53,7 @@ class PlotsPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (showFilter) const Search(hintText: 'Buscar'),
+              // if (showFilter) const Search(hintText: 'Buscar'),
               if (!showFilter) const SizedBox(height: 30),
               if (!showFilter) titleLabel(),
               const SizedBox(height: 10),

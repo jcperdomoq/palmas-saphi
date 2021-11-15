@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:las_palmas/api/plot_service.dart';
 import 'package:las_palmas/models/api/plots.dart';
 import 'package:las_palmas/models/cache/cache_key.dart';
@@ -13,22 +15,71 @@ class PlotsProvider with ChangeNotifier {
 
   late PlotService plotService;
 
+  List<Plots> allPlots = [];
+  // Parcelas cerca a la distancia configurada
   List<Plots> plots = [];
   List<Plots> plantReports = [];
+  Position? currentLocation;
+  int distanceMeters = 1500;
+
+  TextEditingController dniController = TextEditingController();
+  TextEditingController campaniaController = TextEditingController();
+  TextEditingController ensayoController = TextEditingController();
+  TextEditingController bloqueController = TextEditingController();
+  TextEditingController tratamientoController = TextEditingController();
+  TextEditingController circunferenciaController = TextEditingController();
+
+  TextEditingController hojasVerdesController = TextEditingController();
+  TextEditingController stpAnchoController = TextEditingController();
+  TextEditingController stpEspesorController = TextEditingController();
+  TextEditingController numeroFoliolosController = TextEditingController();
+  TextEditingController largoFoliolosController = TextEditingController();
+  TextEditingController anchoFoliolosController = TextEditingController();
+  TextEditingController longPecioloController = TextEditingController();
+  TextEditingController longRaquizController = TextEditingController();
+  TextEditingController alturaPlantaController = TextEditingController();
+  TextEditingController longArqueoController = TextEditingController();
+  TextEditingController deficienciaNaturalController = TextEditingController();
+  TextEditingController observacionController = TextEditingController();
 
   PlotsProvider() {
     plotService = PlotService();
+    _determinePosition();
   }
 
   Future<int> loadPlotsFromServer() async {
+    plots = [];
+    allPlots = [];
     int status = HttpStatus.ok;
     await plotService.getPlots().then((response) {
-      plots = response;
-      notifyListeners();
+      allPlots = response;
+      // notifyListeners();
+      filterPlotsByDistance();
     }).catchError((onError) {
       status = HttpStatus.internalServerError;
     });
     return status;
+  }
+
+  filterPlotsByDistance() {
+    for (final plot in allPlots) {
+      for (final plant in plot.plants) {
+        if (calculateDistance(
+              plant.lat!,
+              plant.lng!,
+              currentLocation!.latitude,
+              currentLocation!.longitude,
+            ).round() <=
+            distanceMeters) {
+          if (plots.any((p) => p.id == plot.id)) {
+            plots.firstWhere((p) => p.id == plot.id).plants.add(plant);
+          } else {
+            plots.add(Plots(id: plot.id, name: plot.name, plants: [plant]));
+          }
+        }
+      }
+    }
+    notifyListeners();
   }
 
   /// Permite asignar el color de las parcelas y plantas
@@ -50,7 +101,6 @@ class PlotsProvider with ChangeNotifier {
     if (reports.isEmpty) {
       for (final plot in plots) {
         for (final plant in plot.plants) {
-          print('plant: ${plant.plant}, lat: ${plant.lat}, long: ${plant.lng}');
           plant.color = const Color(0xFFF92B77);
         }
       }
@@ -83,7 +133,6 @@ class PlotsProvider with ChangeNotifier {
 
   Future<void> loadPlotReports() async {
     final data = await _loadData(CacheKey.reports.toString());
-    print(data);
     plantReports = data != null
         ? (json.decode(data) as List<dynamic>)
             .map((plot) => Plots.fromJson(plot))
@@ -139,5 +188,55 @@ class PlotsProvider with ChangeNotifier {
       const storage = FlutterSecureStorage();
       await storage.delete(key: CacheKey.reports.toString());
     } catch (_) {}
+  }
+
+  /// Determine the current position of the device.
+  ///
+  /// When the location services are not enabled or permissions
+  /// are denied the `Future` will return an error.
+  Future<void> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Test if location services are enabled.
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Location services are not enabled don't continue
+      // accessing the position and request users of the
+      // App to enable the location services.
+      return Future.error('Location services are disabled.');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Permissions are denied, next time you could try
+        // requesting permissions again (this is also where
+        // Android's shouldShowRequestPermissionRationale
+        // returned true. According to Android guidelines
+        // your App should show an explanatory UI now.
+        return Future.error('Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are denied forever, handle appropriately.
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+
+    // When we reach here, permissions are granted and we can
+    // continue accessing the position of the device.
+    currentLocation = await Geolocator.getCurrentPosition();
+  }
+
+  double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+    var p = 0.017453292519943295;
+    var c = cos;
+    var a = 0.5 -
+        c((lat2 - lat1) * p) / 2 +
+        c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p)) / 2;
+    return (12742 * asin(sqrt(a))) * 1000;
   }
 }

@@ -23,6 +23,7 @@ class PlantPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final plantsProvider = Provider.of<PlantsProvider>(context);
+    final plotsProvider = Provider.of<PlotsProvider>(context, listen: false);
 
     final isID = plantsProvider.containsForName('I+D');
     final isBiometrica = plantsProvider.containsForName('Biometría');
@@ -62,44 +63,192 @@ class PlantPage extends StatelessWidget {
                     height: 0,
                   ),
                   const SizedBox(height: 2),
-                  labelField(label: 'DNI Evaluador', value: '73177293'),
-                  labelField(label: 'Parcela', value: 'BCARD'),
-                  labelField(label: 'Campaña', value: '20'),
-                  if (isID) labelField(label: 'Ensayo', value: '1'),
-                  if (isID) labelField(label: 'Bloque', value: '1'),
-                  if (isID) labelField(label: 'Tratamiento', value: '1'),
-                  labelField(label: 'Linea', value: '1'),
-                  labelField(label: 'Planta', value: '145'),
-                  if (isBiometrica)
-                    labelField(label: 'Nª Verdes', value: 'Nª Verdes'),
-                  if (isBiometrica)
-                    labelField(label: 'STP Ancho', value: 'STP Ancho'),
-                  if (isBiometrica)
-                    labelField(label: 'STP Espesor', value: 'STP Espesor'),
-                  if (isBiometrica)
-                    labelField(label: 'Nª Foliolos', value: 'Nª Fololios'),
-                  if (isBiometrica)
+                  labelField(
+                    context,
+                    label: 'DNI Evaluador',
+                    value: editable ? '' : plant.dniEvaluador,
+                    ctrl: plotsProvider.dniController,
+                  ),
+                  labelField(
+                    context,
+                    label: 'Parcela',
+                    value: plot.name,
+                    disabled: true,
+                  ),
+                  labelField(
+                    context,
+                    label: 'Campaña',
+                    value: editable ? '' : plant.campania,
+                    ctrl: plotsProvider.campaniaController,
+                  ),
+                  if (isID ||
+                      (!editable &&
+                          plant.ensayo != null &&
+                          plant.ensayo!.isNotEmpty))
                     labelField(
-                        label: 'Largo Foliolos', value: 'Largo Foliolos'),
-                  if (isBiometrica)
+                      context,
+                      label: 'Ensayo',
+                      value: editable ? '' : plant.ensayo,
+                      ctrl: plotsProvider.ensayoController,
+                    ),
+                  if (isID ||
+                      (!editable &&
+                          plant.bloque != null &&
+                          plant.bloque!.isNotEmpty))
                     labelField(
-                        label: 'Ancho Foliolos', value: 'Ancho Foliolos'),
-                  if (isBiometrica && isID)
-                    labelField(label: 'Long Peciolo', value: 'Long Peciolo'),
-                  if (isBiometrica && isID)
-                    labelField(label: 'Long Raquiz', value: 'Long Raquiz'),
-                  if (isBiometrica && isID)
-                    labelField(label: 'Altura Planta', value: 'Altura Planta'),
-                  if (isBiometrica && isID)
-                    labelField(label: 'Long Arqueo', value: 'Long Arqueo'),
-                  if (isBiometrica && isID)
+                      context,
+                      label: 'Bloque',
+                      value: editable ? '' : plant.bloque,
+                      ctrl: plotsProvider.bloqueController,
+                    ),
+                  if (isID ||
+                      (!editable &&
+                          plant.tratamiento != null &&
+                          plant.tratamiento!.isNotEmpty))
                     labelField(
-                        label: 'Circunferencia', value: 'Circunferencia'),
-                  if (isBiometrica)
+                      context,
+                      label: 'Tratamiento',
+                      value: editable ? '' : plant.tratamiento,
+                      ctrl: plotsProvider.tratamientoController,
+                    ),
+                  labelField(
+                    context,
+                    label: 'Linea',
+                    value: '${plant.line}',
+                    disabled: true,
+                  ),
+                  labelField(
+                    context,
+                    label: 'Planta',
+                    value: '${plant.plant}',
+                    disabled: true,
+                  ),
+                  if (isBiometrica ||
+                      (!editable &&
+                          plant.hojasVerdes != null &&
+                          plant.hojasVerdes!.isNotEmpty))
                     labelField(
-                        label: 'Deficiencia Nutricional',
-                        value: 'Deficiencia Nutricional'),
-                  labelField(label: 'Observación', value: 'Observación'),
+                      context,
+                      label: 'Nª Verdes',
+                      value: editable ? '' : plant.hojasVerdes,
+                      ctrl: plotsProvider.hojasVerdesController,
+                    ),
+                  if (isBiometrica ||
+                      (!editable &&
+                          plant.stpAncho != null &&
+                          plant.stpAncho!.isNotEmpty))
+                    labelField(
+                      context,
+                      label: 'STP Ancho',
+                      value: editable ? '' : plant.stpAncho,
+                      ctrl: plotsProvider.stpAnchoController,
+                    ),
+                  if (isBiometrica ||
+                      (!editable &&
+                          plant.stpEspesor != null &&
+                          plant.stpEspesor!.isNotEmpty))
+                    labelField(
+                      context,
+                      label: 'STP Espesor',
+                      value: editable ? '' : plant.stpEspesor,
+                      ctrl: plotsProvider.stpEspesorController,
+                    ),
+                  if (isBiometrica ||
+                      (!editable &&
+                          plant.numeroFoliolos != null &&
+                          plant.numeroFoliolos!.isNotEmpty))
+                    labelField(
+                      context,
+                      label: 'Nª Foliolos',
+                      value: editable ? '' : plant.numeroFoliolos,
+                      ctrl: plotsProvider.numeroFoliolosController,
+                    ),
+                  if (isBiometrica ||
+                      (!editable &&
+                          plant.largoFoliolos != null &&
+                          plant.largoFoliolos!.isNotEmpty))
+                    labelField(
+                      context,
+                      label: 'Largo Foliolos',
+                      value: editable ? '' : plant.largoFoliolos,
+                      ctrl: plotsProvider.largoFoliolosController,
+                    ),
+                  if (isBiometrica ||
+                      (!editable &&
+                          plant.anchoFoliolos != null &&
+                          plant.anchoFoliolos!.isNotEmpty))
+                    labelField(
+                      context,
+                      label: 'Ancho Foliolos',
+                      value: editable ? '' : plant.anchoFoliolos,
+                      ctrl: plotsProvider.anchoFoliolosController,
+                    ),
+                  if (isBiometrica && isID ||
+                      (!editable &&
+                          plant.longPeciolo != null &&
+                          plant.longPeciolo!.isNotEmpty))
+                    labelField(
+                      context,
+                      label: 'Long Peciolo',
+                      value: editable ? '' : plant.longPeciolo,
+                      ctrl: plotsProvider.longPecioloController,
+                    ),
+                  if (isBiometrica && isID ||
+                      (!editable &&
+                          plant.longRaquiz != null &&
+                          plant.longRaquiz!.isNotEmpty))
+                    labelField(
+                      context,
+                      label: 'Long Raquiz',
+                      value: editable ? '' : plant.longRaquiz,
+                      ctrl: plotsProvider.longRaquizController,
+                    ),
+                  if (isBiometrica && isID ||
+                      (!editable &&
+                          plant.alturaPlanta != null &&
+                          plant.alturaPlanta!.isNotEmpty))
+                    labelField(
+                      context,
+                      label: 'Altura Planta',
+                      value: editable ? '' : plant.alturaPlanta,
+                      ctrl: plotsProvider.alturaPlantaController,
+                    ),
+                  if (isBiometrica && isID ||
+                      (!editable &&
+                          plant.longArqueo != null &&
+                          plant.longArqueo!.isNotEmpty))
+                    labelField(
+                      context,
+                      label: 'Long Arqueo',
+                      value: editable ? '' : plant.longArqueo,
+                      ctrl: plotsProvider.longArqueoController,
+                    ),
+                  if (isBiometrica && isID ||
+                      (!editable &&
+                          plant.circunferencia != null &&
+                          plant.circunferencia!.isNotEmpty))
+                    labelField(
+                      context,
+                      label: 'Circunferencia',
+                      value: editable ? '' : plant.circunferencia,
+                      ctrl: plotsProvider.circunferenciaController,
+                    ),
+                  if (isBiometrica && isID ||
+                      (!editable &&
+                          plant.deficiencaNatural != null &&
+                          plant.deficiencaNatural!.isNotEmpty))
+                    labelField(
+                      context,
+                      label: 'Deficiencia Nutricional',
+                      value: editable ? '' : plant.deficiencaNatural,
+                      ctrl: plotsProvider.deficienciaNaturalController,
+                    ),
+                  labelField(
+                    context,
+                    label: 'Observación',
+                    value: editable ? '' : plant.observacion,
+                    ctrl: plotsProvider.observacionController,
+                  ),
                   const SizedBox(height: 15),
                   if (editable)
                     CustomButton(
@@ -118,12 +267,35 @@ class PlantPage extends StatelessWidget {
   void save(BuildContext context) async {
     final plotsProvider = Provider.of<PlotsProvider>(context, listen: false);
 
+    final plantToSave = plant.copyWith(
+      dniEvaluador: plotsProvider.dniController.text,
+      campania: plotsProvider.campaniaController.text,
+      ensayo: plotsProvider.ensayoController.text,
+      bloque: plotsProvider.bloqueController.text,
+      tratamiento: plotsProvider.tratamientoController.text,
+      hojasVerdes: plotsProvider.hojasVerdesController.text,
+      stpAncho: plotsProvider.stpAnchoController.text,
+      stpEspesor: plotsProvider.stpEspesorController.text,
+      numeroFoliolos: plotsProvider.numeroFoliolosController.text,
+      largoFoliolos: plotsProvider.largoFoliolosController.text,
+      anchoFoliolos: plotsProvider.anchoFoliolosController.text,
+      longPeciolo: plotsProvider.longPecioloController.text,
+      longRaquiz: plotsProvider.longRaquizController.text,
+      alturaPlanta: plotsProvider.alturaPlantaController.text,
+      longArqueo: plotsProvider.longArqueoController.text,
+      circunferencia: plotsProvider.circunferenciaController.text,
+      deficiencaNatural: plotsProvider.deficienciaNaturalController.text,
+      observacion: plotsProvider.observacionController.text,
+      plotId: plot.id,
+      plantId: plant.id,
+    );
+
     await plotsProvider.loadPlotReports();
     final reports = plotsProvider.plantReports;
     bool reportSaved = false;
     for (final plotReport in reports) {
-      if (plot.id == plotReport.id) {
-        plotReport.plants.add(plant);
+      if (plantToSave.id == plotReport.id) {
+        plotReport.plants.add(plantToSave);
         reportSaved = true;
       }
     }
@@ -131,7 +303,7 @@ class PlantPage extends StatelessWidget {
       reports.add(Plots(
         id: plot.id,
         name: plot.name,
-        plants: [plant],
+        plants: [plantToSave],
       ));
     }
 
@@ -143,7 +315,16 @@ class PlantPage extends StatelessWidget {
     Navigator.of(context).pop();
   }
 
-  SizedBox labelField({required String label, required String value}) {
+  SizedBox labelField(
+    BuildContext context, {
+    required String label,
+    String? value,
+    bool disabled = false,
+    TextEditingController? ctrl,
+  }) {
+    if (ctrl != null) {
+      ctrl.text = value ?? '';
+    }
     return SizedBox(
       height: 58,
       width: double.infinity,
@@ -177,8 +358,8 @@ class PlantPage extends StatelessWidget {
             left: 34,
             right: 10,
             child: TextField(
-              controller: TextEditingController(text: value),
-              enabled: editable,
+              controller: ctrl ?? TextEditingController(text: value),
+              enabled: editable && !disabled,
               style: const TextStyle(
                 color: Color(0xFF6E6E6E),
               ),

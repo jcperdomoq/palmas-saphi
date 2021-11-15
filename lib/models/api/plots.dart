@@ -60,6 +60,26 @@ class Plant {
     this.line,
     this.id,
     this.color,
+    this.dniEvaluador,
+    this.campania,
+    this.ensayo,
+    this.bloque,
+    this.tratamiento,
+    this.circunferencia,
+    this.plotId,
+    this.plantId,
+    this.hojasVerdes,
+    this.stpAncho,
+    this.stpEspesor,
+    this.numeroFoliolos,
+    this.largoFoliolos,
+    this.anchoFoliolos,
+    this.longPeciolo,
+    this.longRaquiz,
+    this.alturaPlanta,
+    this.longArqueo,
+    this.deficiencaNatural,
+    this.observacion,
   });
 
   double? lng;
@@ -69,6 +89,31 @@ class Plant {
   String? id;
   Color? color;
 
+  /// Fields for reports
+  String type = "1";
+
+  String? dniEvaluador;
+  String? campania;
+  String? ensayo;
+  String? bloque;
+  String? tratamiento;
+  String? circunferencia;
+
+  String? plotId;
+  String? plantId;
+  String? hojasVerdes;
+  String? stpAncho;
+  String? stpEspesor;
+  String? numeroFoliolos;
+  String? largoFoliolos;
+  String? anchoFoliolos;
+  String? longPeciolo;
+  String? longRaquiz;
+  String? alturaPlanta;
+  String? longArqueo;
+  String? deficiencaNatural;
+  String? observacion;
+
   Plant copyWith({
     double? lng,
     double? lat,
@@ -76,6 +121,26 @@ class Plant {
     int? line,
     String? id,
     Color? color,
+    String? dniEvaluador,
+    String? campania,
+    String? ensayo,
+    String? bloque,
+    String? tratamiento,
+    String? circunferencia,
+    String? plotId,
+    String? plantId,
+    String? hojasVerdes,
+    String? stpAncho,
+    String? stpEspesor,
+    String? numeroFoliolos,
+    String? largoFoliolos,
+    String? anchoFoliolos,
+    String? longPeciolo,
+    String? longRaquiz,
+    String? alturaPlanta,
+    String? longArqueo,
+    String? deficiencaNatural,
+    String? observacion,
   }) =>
       Plant(
         lng: lng ?? this.lng,
@@ -84,6 +149,26 @@ class Plant {
         line: line ?? this.line,
         id: id ?? this.id,
         color: color ?? this.color,
+        dniEvaluador: dniEvaluador ?? this.dniEvaluador,
+        campania: campania ?? this.campania,
+        ensayo: ensayo ?? this.ensayo,
+        bloque: bloque ?? this.bloque,
+        tratamiento: tratamiento ?? this.tratamiento,
+        circunferencia: circunferencia ?? this.circunferencia,
+        plotId: plotId ?? this.plotId,
+        plantId: plantId ?? this.plantId,
+        hojasVerdes: hojasVerdes ?? this.hojasVerdes,
+        stpAncho: stpAncho ?? this.stpAncho,
+        stpEspesor: stpEspesor ?? this.stpEspesor,
+        numeroFoliolos: numeroFoliolos ?? this.numeroFoliolos,
+        largoFoliolos: largoFoliolos ?? this.largoFoliolos,
+        anchoFoliolos: anchoFoliolos ?? this.anchoFoliolos,
+        longPeciolo: longPeciolo ?? this.longPeciolo,
+        longRaquiz: longRaquiz ?? this.longRaquiz,
+        alturaPlanta: alturaPlanta ?? this.alturaPlanta,
+        longArqueo: longArqueo ?? this.longArqueo,
+        deficiencaNatural: deficiencaNatural ?? this.deficiencaNatural,
+        observacion: observacion ?? this.observacion,
       );
 
   factory Plant.fromJson(Map<String, dynamic> json) => Plant(
@@ -92,6 +177,26 @@ class Plant {
         plant: json["plant"],
         line: json["line"],
         id: json["_id"],
+        dniEvaluador: json["dniEvaluador"],
+        campania: json["campania"],
+        ensayo: json["ensayo"],
+        bloque: json["bloque"],
+        tratamiento: json["tratamiento"],
+        circunferencia: json["circunferencia"],
+        plotId: json["plotId"],
+        plantId: json["plantId"],
+        hojasVerdes: json["hojasVerdes"],
+        stpAncho: json["stpAncho"],
+        stpEspesor: json["stpEspesor"],
+        numeroFoliolos: json["numeroFoliolos"],
+        largoFoliolos: json["largoFoliolos"],
+        anchoFoliolos: json["anchoFoliolos"],
+        longPeciolo: json["longPeciolo"],
+        longRaquiz: json["longRaquiz"],
+        alturaPlanta: json["alturaPlanta"],
+        longArqueo: json["longArqueo"],
+        deficiencaNatural: json["deficiencaNatural"],
+        observacion: json["observacion"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -100,10 +205,31 @@ class Plant {
         "plant": plant,
         "line": line,
         "_id": id,
+        "type": type,
+        "dniEvaluador": dniEvaluador,
+        "campania": campania,
+        "ensayo": ensayo,
+        "bloque": bloque,
+        "tratamiento": tratamiento,
+        "circunferencia": circunferencia,
+        "plotId": plotId,
+        "plantId": plantId,
+        "hojasVerdes": hojasVerdes,
+        "stpAncho": stpAncho,
+        "stpEspesor": stpEspesor,
+        "numeroFoliolos": numeroFoliolos,
+        "largoFoliolos": largoFoliolos,
+        "anchoFoliolos": anchoFoliolos,
+        "longPeciolo": longPeciolo,
+        "longRaquiz": longRaquiz,
+        "alturaPlanta": alturaPlanta,
+        "longArqueo": longArqueo,
+        "deficiencaNatural": deficiencaNatural,
+        "observacion": observacion,
       };
 
   @override
   String toString() {
-    return 'Plant{lng: $lng, lat: $lat, plant: $plant, line: $line, id: $id}';
+    return 'Plant{dni: $dniEvaluador, lng: $lng, lat: $lat, plant: $plant, line: $line, id: $id}';
   }
 }

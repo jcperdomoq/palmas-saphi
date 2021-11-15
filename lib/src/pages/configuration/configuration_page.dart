@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:las_palmas/src/providers/plots_provider.dart';
 import 'package:las_palmas/src/widgets/custom_buttom.dart';
+import 'package:provider/provider.dart';
 
 class ConfigurationPage extends StatefulWidget {
   const ConfigurationPage({Key? key}) : super(key: key);
@@ -120,6 +122,8 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
   }
 
   void onChanged(double newValue) {
+    final plotsProvider = Provider.of<PlotsProvider>(context, listen: false);
+    plotsProvider.distanceMeters = newValue.round();
     setState(() {
       value = newValue;
     });
