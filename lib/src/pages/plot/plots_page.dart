@@ -1,61 +1,74 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:las_palmas/models/api/plots.dart';
-import 'package:las_palmas/models/plot/plot.dart';
 import 'package:las_palmas/src/pages/plants/plant_page.dart';
 import 'package:las_palmas/src/providers/plots_provider.dart';
 import 'package:provider/provider.dart';
 
-class PlotsPage extends StatelessWidget {
+class PlotsPage extends StatefulWidget {
   final bool showFilter;
   final bool editable;
-  final Map<String, List<Plot>> localPlots = {
-    'Parcela BCARD': [
-      Plot('Planta Linea 1, Planta 145', const Color(0xFFF92B77)),
-      Plot('Planta Linea 2, Planta 146', const Color(0xFF00C347)),
-      Plot('Planta Linea 2, Planta 147', const Color(0xFFF92B77)),
-      Plot('Planta Linea 2, Planta 148', const Color(0xFFF92B77)),
-    ],
-    'Parcela EDRDSA': [
-      Plot('Planta Linea 1, Planta 15', const Color(0xFF00C347)),
-      Plot('Planta Linea 1, Planta 17', const Color(0xFFF92B77)),
-    ],
-    'Parcela EDRDSB': [
-      Plot('Planta Linea 41, Planta 7', const Color(0xFFF92B77)),
-    ]
-  };
 
-  PlotsPage({Key? key, this.showFilter = false, this.editable = true})
+  const PlotsPage({Key? key, this.showFilter = false, this.editable = true})
       : super(key: key);
+
+  @override
+  State<PlotsPage> createState() => _PlotsPageState();
+}
+
+class _PlotsPageState extends State<PlotsPage> {
+  Timer? timer;
+
+  @override
+  void didChangeDependencies() {
+    if (timer == null) {
+      loadPeriodicData();
+    }
+    super.didChangeDependencies();
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
+
+  loadPeriodicData() {
+    final plotsProvider = Provider.of<PlotsProvider>(context);
+    timer = Timer.periodic(const Duration(minutes: 1), (timer) {
+      plotsProvider.loadStorageData();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final plotsProvider = Provider.of<PlotsProvider>(context);
 
-    final plots = editable ? plotsProvider.plots : plotsProvider.plantReports;
-    // if (!editable) {
-    //   plotsProvider.loadColorPlots(plots);
-    // }
+    final plots =
+        widget.editable ? plotsProvider.plots : plotsProvider.plantReports;
     return Scaffold(
-      backgroundColor: showFilter ? Colors.white : const Color(0xFFF5F4F4),
-      appBar: showFilter ? null : buildAppbar(context),
+      backgroundColor:
+          widget.showFilter ? Colors.white : const Color(0xFFF5F4F4),
+      appBar: widget.showFilter ? null : buildAppbar(context),
       body: SafeArea(
         bottom: false,
-        top: showFilter,
+        top: widget.showFilter,
         child: Padding(
           padding: EdgeInsets.only(
             left: 16,
             right: 16,
-            top: showFilter ? 30 : 0,
+            top: widget.showFilter ? 30 : 0,
             bottom: MediaQuery.of(context).viewPadding.bottom > 0 ? 80 : 60,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // if (showFilter) const Search(hintText: 'Buscar'),
-              if (!showFilter) const SizedBox(height: 30),
-              if (!showFilter) titleLabel(),
+              if (!widget.showFilter) const SizedBox(height: 30),
+              if (!widget.showFilter) titleLabel(),
               const SizedBox(height: 10),
               Expanded(
                 child: SingleChildScrollView(
@@ -65,7 +78,7 @@ class PlotsPage extends StatelessWidget {
                       ...plots.map<Widget>(
                         (plot) {
                           final plants = plot.plants;
-                          final hasGreen = !editable
+                          final hasGreen = !widget.editable
                               ? const Color(0xFF00C347)
                               : plants.indexWhere((plot) =>
                                   plot.color == const Color(0xFF00C347));
@@ -125,7 +138,7 @@ class PlotsPage extends StatelessWidget {
             labelCard(
               label: 'Linea ${plant.line}, Planta ${plant.plant}',
               verticalPadding: 5,
-              color: !editable
+              color: !widget.editable
                   ? const Color(0xFF00C347)
                   : plant.color ?? const Color(0xFFF92B77),
               width: MediaQuery.of(context).size.width * 0.8,
@@ -143,7 +156,7 @@ class PlotsPage extends StatelessWidget {
       CupertinoPageRoute(
         builder: (context) => PlantPage(
           plant: plant,
-          editable: editable,
+          editable: widget.editable,
           plot: plot,
         ),
       ),
@@ -166,7 +179,7 @@ class PlotsPage extends StatelessWidget {
           horizontal: 20,
         ),
         decoration: BoxDecoration(
-          color: !showFilter ? Colors.white : const Color(0xFFF5F4F4),
+          color: !widget.showFilter ? Colors.white : const Color(0xFFF5F4F4),
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(12),
             topRight: Radius.circular(72),
@@ -204,7 +217,8 @@ class PlotsPage extends StatelessWidget {
       centerTitle: false,
       elevation: 0,
       leadingWidth: 30,
-      backgroundColor: showFilter ? Colors.white : const Color(0xFFF5F4F4),
+      backgroundColor:
+          widget.showFilter ? Colors.white : const Color(0xFFF5F4F4),
       leading: leadingButton(context),
     );
   }

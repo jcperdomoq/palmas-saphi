@@ -53,8 +53,11 @@ class PlotsProvider with ChangeNotifier {
     int status = HttpStatus.ok;
     await plotService.getPlots().then((response) {
       allPlots = response;
-      // notifyListeners();
-      filterPlotsByDistance();
+
+      saveData(
+        key: nameList,
+        data: jsonEncode(List<dynamic>.from(allPlots.map((x) => x.toJson()))),
+      );
     }).catchError((onError) {
       status = HttpStatus.internalServerError;
     });
@@ -62,6 +65,7 @@ class PlotsProvider with ChangeNotifier {
   }
 
   filterPlotsByDistance() {
+    plots = [];
     for (final plot in allPlots) {
       for (final plant in plot.plants) {
         if (calculateDistance(
@@ -108,21 +112,19 @@ class PlotsProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> saveStorageData() async {
-    const storage = FlutterSecureStorage();
-    const options = IOSOptions(accessibility: IOSAccessibility.first_unlock);
-    await storage.write(
-        key: nameList, value: jsonEncode(plots), iOptions: options);
-  }
-
-  Future<String?> loadStorageData() async {
+  /// Permite cargar todas las parcelas que estan en local
+  Future<void> loadStorageData() async {
     try {
       const storage = FlutterSecureStorage();
       final res = await storage.read(key: nameList);
-      return res;
-    } catch (e) {
-      return null;
-    }
+      allPlots = res != null
+          ? (json.decode(res) as List<dynamic>)
+              .map((e) => Plots.fromJson(e))
+              .toList()
+          : [];
+      _determinePosition();
+      filterPlotsByDistance();
+    } catch (_) {}
   }
 
   Future<void> saveData({required String key, required String data}) async {
@@ -138,13 +140,6 @@ class PlotsProvider with ChangeNotifier {
             .map((plot) => Plots.fromJson(plot))
             .toList()
         : [];
-    // if (data != null) {
-    //   Map<String, dynamic> decodeMap = json.decode(data);
-    //   final reports = decode(decodeMap);
-    //   plantReports= reports;
-    // } else {
-    //   plotReports = {};
-    // }
   }
 
   void refreshReports() async {
@@ -238,5 +233,14 @@ class PlotsProvider with ChangeNotifier {
         c((lat2 - lat1) * p) / 2 +
         c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p)) / 2;
     return (12742 * asin(sqrt(a))) * 1000;
+  }
+
+  saveReports(List<Plots> reports) async {
+    List<Plant> onlyPlants = [];
+    onlyPlants.addAll(reports.map((plot) => plot.plants).expand((i) => i));
+    final parseToJson = onlyPlants.map((plant) => plant.toJson()).toList();
+    plotService.saveReports(
+      parseToJson,
+    );
   }
 }

@@ -135,6 +135,9 @@ class _SynchronizationPageState extends State<SynchronizationPage> {
 
   synchronization() {
     final plotsProvider = Provider.of<PlotsProvider>(context, listen: false);
+
+    plotsProvider.saveReports(plotsProvider.plantReports);
+
     plotsProvider.clearReports();
     plotsProvider.loadColorPlots([]);
   }

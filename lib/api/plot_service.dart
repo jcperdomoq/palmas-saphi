@@ -7,12 +7,6 @@ class PlotService {
   Future<List<Plots>> getPlots() async {
     final response = await http.get(Uri.parse("https://palmas.ga/plot"));
     if (response.statusCode == 200) {
-      // final decoded = await jsonDecode(response.body);
-      // var list = <Plot>[];
-      // for (var item in decoded) {
-      //   list.add(Plot.fromJson(item));
-      // }
-      // return list;
       List<Plots> plots = [];
       for (var item in json.decode(response.body)) {
         plots.add(Plots.fromJson(item));
@@ -20,5 +14,13 @@ class PlotService {
       return plots;
     }
     return [];
+  }
+
+  Future<void> saveReports(List<Map<String, dynamic>> plants) async {
+    await http.post(
+      Uri.parse("https://palmas.ga/plot/plant"),
+      headers: {"Content-Type": "application/json"},
+      body: json.encode(plants),
+    );
   }
 }
