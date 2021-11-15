@@ -38,6 +38,7 @@ class _PlotsPageState extends State<PlotsPage> {
 
   loadPeriodicData() {
     final plotsProvider = Provider.of<PlotsProvider>(context);
+    plotsProvider.loadStorageData();
     timer = Timer.periodic(const Duration(minutes: 1), (timer) {
       plotsProvider.loadStorageData();
     });

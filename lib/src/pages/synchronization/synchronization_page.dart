@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:las_palmas/src/providers/plots_provider.dart';
 import 'package:las_palmas/src/widgets/error_internet_widget.dart';
+import 'package:las_palmas/util/months.dart';
 import 'package:provider/provider.dart';
 
 class SynchronizationPage extends StatefulWidget {
@@ -46,6 +47,7 @@ class _SynchronizationPageState extends State<SynchronizationPage> {
 
   Column synchronizationForm(BuildContext context) {
     final plotsProvider = Provider.of<PlotsProvider>(context);
+    final date = plotsProvider.synchroDateTime;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -112,12 +114,12 @@ class _SynchronizationPageState extends State<SynchronizationPage> {
                     },
                   ),
                   const Spacer(),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 40),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 40),
                     child: Text(
-                      'Datos Sincronizados el 12 de Octubre del 2020 a las 15:20',
+                      'Datos Sincronizados el ${date.day} de ${months[date.month - 1]} del ${date.year} a las ${date.hour}:${date.minute}',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Color(0xFF828282),
                         fontSize: 15,
                       ),
@@ -167,14 +169,6 @@ class _SynchronizationPageState extends State<SynchronizationPage> {
         mensajeError();
       }
     });
-    // plotsProvider.plotService.getPlots().then((value) {
-    //   print(value);
-    //   setState(() {
-    //     stateDownload = "OK";
-    //   });
-    // }).catchError((onError) {
-    //   mensajeError();
-    // });
   }
 
   mensajeError() async {

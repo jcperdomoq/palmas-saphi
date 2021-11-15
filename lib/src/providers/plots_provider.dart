@@ -14,6 +14,7 @@ class PlotsProvider with ChangeNotifier {
   final nameList = 'plots';
 
   late PlotService plotService;
+  DateTime synchroDateTime = DateTime.now();
 
   List<Plots> allPlots = [];
   // Parcelas cerca a la distancia configurada
@@ -53,7 +54,7 @@ class PlotsProvider with ChangeNotifier {
     int status = HttpStatus.ok;
     await plotService.getPlots().then((response) {
       allPlots = response;
-
+      updateSyncTime();
       saveData(
         key: nameList,
         data: jsonEncode(List<dynamic>.from(allPlots.map((x) => x.toJson()))),
@@ -181,6 +182,7 @@ class PlotsProvider with ChangeNotifier {
   Future<void> clearReports() async {
     try {
       const storage = FlutterSecureStorage();
+      updateSyncTime();
       await storage.delete(key: CacheKey.reports.toString());
     } catch (_) {}
   }
@@ -242,5 +244,9 @@ class PlotsProvider with ChangeNotifier {
     plotService.saveReports(
       parseToJson,
     );
+  }
+
+  updateSyncTime() {
+    synchroDateTime = DateTime.now();
   }
 }
