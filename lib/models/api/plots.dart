@@ -78,7 +78,7 @@ class Plant {
     this.longRaquiz,
     this.alturaPlanta,
     this.longArqueo,
-    this.deficiencaNatural,
+    this.deficienciaNutricional,
     this.observacion,
   });
 
@@ -111,7 +111,7 @@ class Plant {
   String? longRaquiz;
   String? alturaPlanta;
   String? longArqueo;
-  String? deficiencaNatural;
+  List<String>? deficienciaNutricional;
   String? observacion;
 
   Plant copyWith({
@@ -139,7 +139,7 @@ class Plant {
     String? longRaquiz,
     String? alturaPlanta,
     String? longArqueo,
-    String? deficiencaNatural,
+    List<String>? deficienciaNutricional,
     String? observacion,
   }) =>
       Plant(
@@ -167,7 +167,8 @@ class Plant {
         longRaquiz: longRaquiz ?? this.longRaquiz,
         alturaPlanta: alturaPlanta ?? this.alturaPlanta,
         longArqueo: longArqueo ?? this.longArqueo,
-        deficiencaNatural: deficiencaNatural ?? this.deficiencaNatural,
+        deficienciaNutricional:
+            deficienciaNutricional ?? this.deficienciaNutricional,
         observacion: observacion ?? this.observacion,
       );
 
@@ -195,7 +196,7 @@ class Plant {
         longRaquiz: json["long_raquiz"],
         alturaPlanta: json["altura_planta"],
         longArqueo: json["long_arqueo"],
-        deficiencaNatural: json["deficienca_natural"],
+        deficienciaNutricional: json["deficienca_natural"],
         observacion: json["observacion"],
       );
 
@@ -206,7 +207,6 @@ class Plant {
         "line": line,
         "_id": id,
         "type": type,
-
         "dniEvaluador": dniEvaluador,
         "campania": campania,
         "ensayo": ensayo,
@@ -225,7 +225,7 @@ class Plant {
         "long_raquiz": longRaquiz,
         "altura_planta": alturaPlanta,
         "long_arqueo": longArqueo,
-        // "deficienca_natural": deficiencaNatural,
+        "deficienca_natural": deficienciaNutricional,
         "observacion": observacion,
       };
 

@@ -6,28 +6,37 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:las_palmas/api/plot_service.dart';
+import 'package:las_palmas/models/api/plantacion.dart';
 import 'package:las_palmas/models/api/plots.dart';
 import 'package:las_palmas/models/cache/cache_key.dart';
 import 'package:las_palmas/models/plot/plot.dart';
+import 'package:las_palmas/util/filter_coordinates.dart';
+import 'package:syncfusion_flutter_maps/maps.dart';
 
 class PlotsProvider with ChangeNotifier {
   final nameList = 'plots';
 
   late PlotService plotService;
-  DateTime synchroDateTime = DateTime.now();
+  DateTime syncDateTime = DateTime.now();
+  DateTime downloadDateTime = DateTime.now();
 
   List<Plots> allPlots = [];
   // Parcelas cerca a la distancia configurada
   List<Plots> plots = [];
   List<Plots> plantReports = [];
+  Plantacion? plantacion;
+
+  // Features disponibles en mi ubicación
+  List<Feature> features = [];
+
   Position? currentLocation;
   int distanceMeters = 1500;
 
   TextEditingController dniController = TextEditingController();
   TextEditingController campaniaController = TextEditingController();
-  TextEditingController ensayoController = TextEditingController();
-  TextEditingController bloqueController = TextEditingController();
-  TextEditingController tratamientoController = TextEditingController();
+  String ensayo = '';
+  String bloque = '';
+  String tratamiento = '';
   TextEditingController circunferenciaController = TextEditingController();
 
   TextEditingController hojasVerdesController = TextEditingController();
@@ -40,12 +49,61 @@ class PlotsProvider with ChangeNotifier {
   TextEditingController longRaquizController = TextEditingController();
   TextEditingController alturaPlantaController = TextEditingController();
   TextEditingController longArqueoController = TextEditingController();
-  TextEditingController deficienciaNaturalController = TextEditingController();
+  List<String> deficienciaNutricional = [];
   TextEditingController observacionController = TextEditingController();
 
   PlotsProvider() {
     plotService = PlotService();
     _determinePosition();
+
+    loadSyncDateTime();
+    loadDownloadDateTime();
+  }
+
+  loadSyncDateTime() async {
+    const storage = FlutterSecureStorage();
+    final key = CacheKey.syncDateTime.toString();
+    final value = await storage.read(key: key);
+    if (value != null) {
+      syncDateTime = DateTime.parse(value);
+      notifyListeners();
+    }
+  }
+
+  loadDownloadDateTime() async {
+    const storage = FlutterSecureStorage();
+    final key = CacheKey.downloadDateTime.toString();
+    final value = await storage.read(key: key);
+    if (value != null) {
+      downloadDateTime = DateTime.parse(value);
+      notifyListeners();
+    }
+  }
+
+  Future<int> loadPlantacionFromServer() async {
+    int status = HttpStatus.ok;
+    await plotService.getPlantacion().then((response) {
+      plantacion = response;
+      if (plantacion != null) {
+        plantacion!.plantacion.map((p) {
+          p.features.map((f) {
+            if (currentLocation != null &&
+                f.geometry != null &&
+                f.geometry!.coordinates != null) {
+              if (FilterCoordinates.checkIfValidMarker(
+                  MapLatLng(
+                      currentLocation!.latitude, currentLocation!.longitude),
+                  f.geometry!.coordinates!)) {
+                features.add(f);
+                f = f.copyWith(plantacion: p.name);
+              }
+            }
+          });
+        });
+      }
+      print(plantacion);
+    });
+    return status;
   }
 
   Future<int> loadPlotsFromServer() async {
@@ -54,7 +112,7 @@ class PlotsProvider with ChangeNotifier {
     int status = HttpStatus.ok;
     await plotService.getPlots().then((response) {
       allPlots = response;
-      updateSyncTime();
+      updateDownloadTime();
       saveData(
         key: nameList,
         data: jsonEncode(List<dynamic>.from(allPlots.map((x) => x.toJson()))),
@@ -247,6 +305,18 @@ class PlotsProvider with ChangeNotifier {
   }
 
   updateSyncTime() {
-    synchroDateTime = DateTime.now();
+    syncDateTime = DateTime.now();
+    saveData(
+      key: CacheKey.syncDateTime.toString(),
+      data: syncDateTime.toString(),
+    );
+  }
+
+  updateDownloadTime() {
+    downloadDateTime = DateTime.now();
+    saveData(
+      key: CacheKey.downloadDateTime.toString(),
+      data: downloadDateTime.toString(),
+    );
   }
 }

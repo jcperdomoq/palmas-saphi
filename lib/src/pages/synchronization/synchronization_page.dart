@@ -17,8 +17,8 @@ class SynchronizationPage extends StatefulWidget {
 class _SynchronizationPageState extends State<SynchronizationPage> {
   // Solo para fines ilustrativos
   bool showErrorConnextionWidget = false;
-  String stateDownload = "OK";
-  String stateSeendForm = "OK";
+  String stateDownload = "(OK)";
+  String stateSeendForm = "(OK)";
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +47,8 @@ class _SynchronizationPageState extends State<SynchronizationPage> {
 
   Column synchronizationForm(BuildContext context) {
     final plotsProvider = Provider.of<PlotsProvider>(context);
-    final date = plotsProvider.synchroDateTime;
+    final syncDate = plotsProvider.syncDateTime;
+    final downloadDate = plotsProvider.downloadDateTime;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -83,12 +84,39 @@ class _SynchronizationPageState extends State<SynchronizationPage> {
                       ),
                       const Spacer(),
                       label(
-                        stateDownload,
-                        const Color(0xFF13D640),
+                        stateSeendForm,
+                        stateSeendForm == '(OK)'
+                            ? const Color(0xFF13D640)
+                            : Colors.orange,
                       ),
                     ],
                   ),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      child: const Text('Sincronizar'),
+                      onPressed: synchronization,
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all<Color>(
+                          const Color(0xFF00C347),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Text(
+                      'Datos Sincronizados el ${syncDate.day} de ${months[syncDate.month - 1]} del ${syncDate.year} a las ${syncDate.hour < 10 ? '0' : ''}${syncDate.hour}:${syncDate.minute < 10 ? '0' : ''}${syncDate.minute}',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Color(0xFF828282),
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 100),
                   Row(
                     children: [
                       label(
@@ -97,27 +125,33 @@ class _SynchronizationPageState extends State<SynchronizationPage> {
                       ),
                       const Spacer(),
                       label(
-                        stateSeendForm,
-                        const Color(0xFF13D640),
+                        stateDownload,
+                        stateDownload == '(OK)'
+                            ? const Color(0xFF13D640)
+                            : Colors.orange,
                       ),
                     ],
                   ),
-                  const Spacer(),
-                  ElevatedButton(
-                    child: const Text('Sincronizar'),
-                    onPressed: synchronization,
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      child: const Text('Descargar informacion'),
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all<Color>(
+                          const Color(0xFF00C347),
+                        ),
+                      ),
+                      onPressed: () {
+                        getPlots(plotsProvider);
+                      },
+                    ),
                   ),
-                  ElevatedButton(
-                    child: const Text('Descargar informacion'),
-                    onPressed: () {
-                      getPlots(plotsProvider);
-                    },
-                  ),
-                  const Spacer(),
+                  const SizedBox(height: 10),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 40),
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Text(
-                      'Datos Sincronizados el ${date.day} de ${months[date.month - 1]} del ${date.year} a las ${date.hour}:${date.minute}',
+                      'Datos Sincronizados el ${downloadDate.day} de ${months[downloadDate.month - 1]} del ${downloadDate.year} a las ${downloadDate.hour < 10 ? '0' : ''}${downloadDate.hour}:${downloadDate.minute < 10 ? '0' : ''}${downloadDate.minute}',
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: Color(0xFF828282),
@@ -136,12 +170,18 @@ class _SynchronizationPageState extends State<SynchronizationPage> {
   }
 
   synchronization() {
+    setState(() {
+      stateSeendForm = '(EN PROCESO)';
+    });
     final plotsProvider = Provider.of<PlotsProvider>(context, listen: false);
 
     plotsProvider.saveReports(plotsProvider.plantReports);
 
     plotsProvider.clearReports();
     plotsProvider.loadColorPlots([]);
+    setState(() {
+      stateSeendForm = '(OK)';
+    });
   }
 
   Text label(String label, Color color) {
@@ -154,27 +194,37 @@ class _SynchronizationPageState extends State<SynchronizationPage> {
     );
   }
 
-  getPlots(PlotsProvider plotsProvider) {
+  getPlots(PlotsProvider plotsProvider) async {
     setState(() {
-      stateDownload = "EN PROCESO";
+      stateDownload = "(EN PROCESO)";
     });
 
-    plotsProvider.loadPlotsFromServer().then((value) {
-      if (value == HttpStatus.ok) {
-        setState(() {
-          stateDownload = "OK";
-        });
-        plotsProvider.loadColorPlots(plotsProvider.plantReports);
-      } else {
-        mensajeError();
-      }
-    });
+    // final status = await plotsProvider.loadPlantacionFromServer();
+    final status = await plotsProvider.loadPlotsFromServer();
+    if (status == HttpStatus.ok) {
+      setState(() {
+        stateDownload = "(OK)";
+      });
+    } else {
+      mensajeError();
+    }
+
+    // plotsProvider.loadPlotsFromServer().then((value) {
+    //   if (value == HttpStatus.ok) {
+    //     setState(() {
+    //       stateDownload = "(OK)";
+    //     });
+    //     plotsProvider.loadColorPlots(plotsProvider.plantReports);
+    //   } else {
+    //     mensajeError();
+    //   }
+    // });
   }
 
   mensajeError() async {
     setState(() {
       showErrorConnextionWidget = true;
-      stateDownload = "Error";
+      stateDownload = "(Error)";
     });
     await Future.delayed(const Duration(seconds: 5));
     setState(() => showErrorConnextionWidget = false);

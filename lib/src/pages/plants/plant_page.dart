@@ -4,19 +4,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:las_palmas/models/api/plots.dart';
 import 'package:las_palmas/models/cache/cache_key.dart';
+import 'package:las_palmas/models/form/bloque.dart';
+import 'package:las_palmas/models/form/deficiencia_nutricional.dart';
+import 'package:las_palmas/models/form/ensayo.dart';
+import 'package:las_palmas/models/form/tratamiento.dart';
+import 'package:las_palmas/src/pages/plants/widgets/label_field.dart';
 import 'package:las_palmas/src/providers/plants_provider.dart';
 import 'package:las_palmas/src/providers/plots_provider.dart';
 import 'package:las_palmas/src/widgets/custom_buttom.dart';
+import 'package:las_palmas/util/dialogs.dart';
 import 'package:provider/provider.dart';
 
 class PlantPage extends StatelessWidget {
   final bool editable;
   final Plant plant;
   final Plots plot;
+  final Color statusColor;
   const PlantPage({
     Key? key,
     required this.plot,
     required this.plant,
+    required this.statusColor,
     this.editable = true,
   }) : super(key: key);
 
@@ -47,15 +55,7 @@ class PlantPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    'Linea ${plant.line}, Planta ${plant.plant}',
-                    style: const TextStyle(
-                      color: Color(0xFF676767),
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 10),
                   headerLabel(),
                   const SizedBox(height: 18),
                   const Divider(
@@ -63,62 +63,123 @@ class PlantPage extends StatelessWidget {
                     height: 0,
                   ),
                   const SizedBox(height: 2),
-                  labelField(
-                    context,
+                  LabelField(
                     label: 'DNI Evaluador',
-                    value: editable ? '' : plant.dniEvaluador,
+                    value: editable
+                        ? plotsProvider.dniController.text
+                        : plant.dniEvaluador,
                     ctrl: plotsProvider.dniController,
                   ),
-                  labelField(
-                    context,
+                  const LabelField(
+                    label: 'Plantación',
+                    value: 'Definir por API', // TODO: definir por API
+                    disabled: true,
+                    // ctrl: plotsProvider.dniController,
+                  ),
+                  LabelField(
                     label: 'Parcela',
                     value: plot.name,
                     disabled: true,
                   ),
-                  labelField(
-                    context,
+                  LabelField(
                     label: 'Campaña',
-                    value: editable ? '' : plant.campania,
+                    value: editable
+                        ? plotsProvider.campaniaController.text
+                        : plant.campania,
                     ctrl: plotsProvider.campaniaController,
                   ),
                   if (isID ||
                       (!editable &&
                           plant.ensayo != null &&
                           plant.ensayo!.isNotEmpty))
-                    labelField(
-                      context,
+                    LabelField(
                       label: 'Ensayo',
-                      value: editable ? '' : plant.ensayo,
-                      ctrl: plotsProvider.ensayoController,
+                      value: plant.ensayo,
+                      onTap: () async {
+                        String plantacion = 'shanuci';
+                        final items = await Dialogs.showMultiSelect(
+                          context,
+                          multiSelect: false,
+                          title: 'Ensayo',
+                          items: plantacion == 'shanuci'
+                              ? Ensayo.shanusiItems
+                              : Ensayo.plantawasiItems,
+                          initialSelectedValues: [plotsProvider.ensayo],
+                        );
+                        plotsProvider.ensayo =
+                            items == null ? '' : items.join('');
+                        plant.ensayo = plotsProvider.ensayo;
+                      },
                     ),
                   if (isID ||
                       (!editable &&
                           plant.bloque != null &&
                           plant.bloque!.isNotEmpty))
-                    labelField(
-                      context,
+                    LabelField(
                       label: 'Bloque',
-                      value: editable ? '' : plant.bloque,
-                      ctrl: plotsProvider.bloqueController,
+                      value: plant.bloque,
+                      onTap: () async {
+                        String ensayo = plotsProvider.ensayo;
+                        final dataDialog = ensayo == 'ASD' ||
+                                ensayo == 'Tres densidades y cuatro materiales'
+                            ? Bloque.case1
+                            : ensayo == 'Densidades' ||
+                                    ensayo == 'El dorado' ||
+                                    ensayo == 'Híbrido E04a'
+                                ? Bloque.case2
+                                : ensayo == 'Dosis dolomita' ||
+                                        ensayo == 'Elite vs Millenium'
+                                    ? Bloque.case3
+                                    : Bloque.case4;
+                        final items = await Dialogs.showMultiSelect(
+                          context,
+                          multiSelect: false,
+                          title: 'Bloque',
+                          items: dataDialog,
+                        );
+                        plotsProvider.bloque =
+                            items == null ? '' : items.join('');
+                        plant.bloque = plotsProvider.bloque;
+                      },
                     ),
                   if (isID ||
                       (!editable &&
                           plant.tratamiento != null &&
                           plant.tratamiento!.isNotEmpty))
-                    labelField(
-                      context,
-                      label: 'Tratamiento',
-                      value: editable ? '' : plant.tratamiento,
-                      ctrl: plotsProvider.tratamientoController,
+                    LabelField(
+                      label: 'Símbolo tratamiento',
+                      value: plant.tratamiento,
+                      onTap: () async {
+                        String ensayo = plotsProvider.ensayo;
+                        final items = await Dialogs.showMultiSelect(context,
+                            multiSelect: false,
+                            title: 'Símbolo tratamiento',
+                            items: ensayo == 'ASD'
+                                ? Tratamiento.case1
+                                : ensayo == 'Densidades'
+                                    ? Tratamiento.case2
+                                    : ensayo == 'El dorado'
+                                        ? Tratamiento.case3
+                                        : ensayo == 'Híbrido E04a'
+                                            ? Tratamiento.case4
+                                            : ensayo == 'Dosis dolomita'
+                                                ? Tratamiento.case5
+                                                : ensayo == 'Elite vs Millenium'
+                                                    ? Tratamiento.case6
+                                                    : ensayo == 'Híbrido OxG'
+                                                        ? Tratamiento.case7
+                                                        : Tratamiento.case8);
+                        plotsProvider.tratamiento =
+                            items == null ? '' : items.join('');
+                        plant.tratamiento = plotsProvider.tratamiento;
+                      },
                     ),
-                  labelField(
-                    context,
+                  LabelField(
                     label: 'Linea',
                     value: '${plant.line}',
                     disabled: true,
                   ),
-                  labelField(
-                    context,
+                  LabelField(
                     label: 'Planta',
                     value: '${plant.plant}',
                     disabled: true,
@@ -127,126 +188,173 @@ class PlantPage extends StatelessWidget {
                       (!editable &&
                           plant.hojasVerdes != null &&
                           plant.hojasVerdes!.isNotEmpty))
-                    labelField(
-                      context,
-                      label: 'Nª Verdes',
-                      value: editable ? '' : plant.hojasVerdes,
+                    LabelField(
+                      label: 'Nª Verdes (und)',
+                      value: editable
+                          ? plotsProvider.hojasVerdesController.text
+                          : plant.hojasVerdes,
                       ctrl: plotsProvider.hojasVerdesController,
+                      keyboardType: TextInputType.number,
+                      maxLength: 10,
                     ),
                   if (isBiometrica ||
                       (!editable &&
                           plant.stpAncho != null &&
                           plant.stpAncho!.isNotEmpty))
-                    labelField(
-                      context,
-                      label: 'STP Ancho',
-                      value: editable ? '' : plant.stpAncho,
+                    LabelField(
+                      label: 'STP Ancho (cm)',
+                      value: editable
+                          ? plotsProvider.stpAnchoController.text
+                          : plant.stpAncho,
                       ctrl: plotsProvider.stpAnchoController,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
                     ),
                   if (isBiometrica ||
                       (!editable &&
                           plant.stpEspesor != null &&
                           plant.stpEspesor!.isNotEmpty))
-                    labelField(
-                      context,
-                      label: 'STP Espesor',
-                      value: editable ? '' : plant.stpEspesor,
+                    LabelField(
+                      label: 'STP Espesor (cm)',
+                      value: editable
+                          ? plotsProvider.stpEspesorController.text
+                          : plant.stpEspesor,
                       ctrl: plotsProvider.stpEspesorController,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
                     ),
                   if (isBiometrica ||
                       (!editable &&
                           plant.numeroFoliolos != null &&
                           plant.numeroFoliolos!.isNotEmpty))
-                    labelField(
-                      context,
-                      label: 'Nª Foliolos',
-                      value: editable ? '' : plant.numeroFoliolos,
+                    LabelField(
+                      label: 'Nª Foliolos (und)',
+                      value: editable
+                          ? plotsProvider.numeroFoliolosController.text
+                          : plant.numeroFoliolos,
                       ctrl: plotsProvider.numeroFoliolosController,
+                      keyboardType: TextInputType.number,
+                      maxLength: 10,
                     ),
                   if (isBiometrica ||
                       (!editable &&
                           plant.largoFoliolos != null &&
                           plant.largoFoliolos!.isNotEmpty))
-                    labelField(
-                      context,
-                      label: 'Largo Foliolos',
-                      value: editable ? '' : plant.largoFoliolos,
+                    LabelField(
+                      label: 'Largo Foliolos (cm)',
+                      value: editable
+                          ? plotsProvider.largoFoliolosController.text
+                          : plant.largoFoliolos,
                       ctrl: plotsProvider.largoFoliolosController,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
                     ),
                   if (isBiometrica ||
                       (!editable &&
                           plant.anchoFoliolos != null &&
                           plant.anchoFoliolos!.isNotEmpty))
-                    labelField(
-                      context,
-                      label: 'Ancho Foliolos',
-                      value: editable ? '' : plant.anchoFoliolos,
+                    LabelField(
+                      label: 'Ancho Foliolos (cm)',
+                      value: editable
+                          ? plotsProvider.anchoFoliolosController.text
+                          : plant.anchoFoliolos,
                       ctrl: plotsProvider.anchoFoliolosController,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
                     ),
                   if (isBiometrica && isID ||
                       (!editable &&
                           plant.longPeciolo != null &&
                           plant.longPeciolo!.isNotEmpty))
-                    labelField(
-                      context,
-                      label: 'Long Peciolo',
-                      value: editable ? '' : plant.longPeciolo,
+                    LabelField(
+                      label: 'Long Peciolo (m)',
+                      value: editable
+                          ? plotsProvider.longPecioloController.text
+                          : plant.longPeciolo,
                       ctrl: plotsProvider.longPecioloController,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
                     ),
                   if (isBiometrica && isID ||
                       (!editable &&
                           plant.longRaquiz != null &&
                           plant.longRaquiz!.isNotEmpty))
-                    labelField(
-                      context,
-                      label: 'Long Raquiz',
-                      value: editable ? '' : plant.longRaquiz,
+                    LabelField(
+                      label: 'Long Raquiz (m)',
+                      value: editable
+                          ? plotsProvider.longRaquizController.text
+                          : plant.longRaquiz,
                       ctrl: plotsProvider.longRaquizController,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
                     ),
                   if (isBiometrica && isID ||
                       (!editable &&
                           plant.alturaPlanta != null &&
                           plant.alturaPlanta!.isNotEmpty))
-                    labelField(
-                      context,
-                      label: 'Altura Planta',
-                      value: editable ? '' : plant.alturaPlanta,
+                    LabelField(
+                      label: 'Altura Planta (cm)',
+                      value: editable
+                          ? plotsProvider.alturaPlantaController.text
+                          : plant.alturaPlanta,
                       ctrl: plotsProvider.alturaPlantaController,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
                     ),
                   if (isBiometrica && isID ||
                       (!editable &&
                           plant.longArqueo != null &&
                           plant.longArqueo!.isNotEmpty))
-                    labelField(
-                      context,
-                      label: 'Long Arqueo',
-                      value: editable ? '' : plant.longArqueo,
+                    LabelField(
+                      label: 'Long Arqueo (cm)',
+                      value: editable
+                          ? plotsProvider.longArqueoController.text
+                          : plant.longArqueo,
                       ctrl: plotsProvider.longArqueoController,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
                     ),
                   if (isBiometrica && isID ||
                       (!editable &&
                           plant.circunferencia != null &&
                           plant.circunferencia!.isNotEmpty))
-                    labelField(
-                      context,
-                      label: 'Circunferencia',
-                      value: editable ? '' : plant.circunferencia,
+                    LabelField(
+                      label: 'Circunferencia (cm)',
+                      value: editable
+                          ? plotsProvider.circunferenciaController.text
+                          : plant.circunferencia,
                       ctrl: plotsProvider.circunferenciaController,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
                     ),
                   if (isBiometrica && isID ||
                       (!editable &&
-                          plant.deficiencaNatural != null &&
-                          plant.deficiencaNatural!.isNotEmpty))
-                    labelField(
-                      context,
+                          plant.deficienciaNutricional != null &&
+                          plant.deficienciaNutricional!.isNotEmpty))
+                    LabelField(
                       label: 'Deficiencia Nutricional',
-                      value: editable ? '' : plant.deficiencaNatural,
-                      ctrl: plotsProvider.deficienciaNaturalController,
+                      value: plant.deficienciaNutricional != null
+                          ? plant.deficienciaNutricional!.join(', ')
+                          : '',
+                      onTap: () async {
+                        final items = await Dialogs.showMultiSelect(
+                          context,
+                          multiSelect: true,
+                          title: 'Deficiencia Nutricional',
+                          items: DeficienciaNutricional.values,
+                          initialSelectedValues:
+                              plotsProvider.deficienciaNutricional,
+                        );
+                        plotsProvider.deficienciaNutricional = items ?? [];
+                        plant.deficienciaNutricional =
+                            plotsProvider.deficienciaNutricional;
+                      },
                     ),
-                  labelField(
-                    context,
+                  LabelField(
                     label: 'Observación',
-                    value: editable ? '' : plant.observacion,
+                    value: editable
+                        ? plotsProvider.observacionController.text
+                        : plant.observacion,
                     ctrl: plotsProvider.observacionController,
                   ),
                   const SizedBox(height: 15),
@@ -270,9 +378,9 @@ class PlantPage extends StatelessWidget {
     final plantToSave = plant.copyWith(
       dniEvaluador: plotsProvider.dniController.text,
       campania: plotsProvider.campaniaController.text,
-      ensayo: plotsProvider.ensayoController.text,
-      bloque: plotsProvider.bloqueController.text,
-      tratamiento: plotsProvider.tratamientoController.text,
+      ensayo: plotsProvider.ensayo,
+      bloque: plotsProvider.bloque,
+      tratamiento: plotsProvider.tratamiento,
       hojasVerdes: plotsProvider.hojasVerdesController.text,
       stpAncho: plotsProvider.stpAnchoController.text,
       stpEspesor: plotsProvider.stpEspesorController.text,
@@ -284,7 +392,7 @@ class PlantPage extends StatelessWidget {
       alturaPlanta: plotsProvider.alturaPlantaController.text,
       longArqueo: plotsProvider.longArqueoController.text,
       circunferencia: plotsProvider.circunferenciaController.text,
-      deficiencaNatural: plotsProvider.deficienciaNaturalController.text,
+      deficienciaNutricional: plotsProvider.deficienciaNutricional,
       observacion: plotsProvider.observacionController.text,
       plotId: plot.id,
       plantId: plant.id,
@@ -315,81 +423,23 @@ class PlantPage extends StatelessWidget {
     Navigator.of(context).pop();
   }
 
-  SizedBox labelField(
-    BuildContext context, {
-    required String label,
-    String? value,
-    bool disabled = false,
-    TextEditingController? ctrl,
-  }) {
-    if (ctrl != null) {
-      ctrl.text = value ?? '';
-    }
-    return SizedBox(
-      height: 58,
-      width: double.infinity,
-      child: Stack(
-        children: [
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            top: 11,
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Color(0xFFF5F5F5),
-                borderRadius: BorderRadius.all(Radius.circular(10)),
-              ),
-            ),
-          ),
-          Positioned(
-            left: 13,
-            top: 1,
-            child: Text(
-              label,
-              style: const TextStyle(
-                color: Color(0xFF969696),
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 14,
-            left: 34,
-            right: 10,
-            child: TextField(
-              controller: ctrl ?? TextEditingController(text: value),
-              enabled: editable && !disabled,
-              style: const TextStyle(
-                color: Color(0xFF6E6E6E),
-              ),
-              decoration: const InputDecoration(
-                isDense: true,
-                contentPadding: EdgeInsets.symmetric(vertical: 0),
-                border: InputBorder.none,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Row headerLabel() {
     return Row(
-      children: const [
+      children: [
         Text(
           'Estado:',
           style: TextStyle(
-            color: Color(0xFF2BF9BB),
+            color: statusColor,
             fontSize: 15,
           ),
         ),
-        Spacer(),
+        const Spacer(),
         Text(
-          'Inspeccionado:',
+          statusColor == const Color(0xFF00C347)
+              ? 'Inspeccionado'
+              : 'No inspeccionado',
           style: TextStyle(
-            color: Color(0xFF2BF9BB),
+            color: statusColor,
             fontSize: 15,
           ),
         ),

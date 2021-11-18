@@ -10,18 +10,19 @@ import 'package:las_palmas/src/pages/plot/widgets/empty_message.dart';
 import 'package:las_palmas/src/providers/plots_provider.dart';
 import 'package:provider/provider.dart';
 
-class PlotsPage extends StatefulWidget {
+class PlantacionPage extends StatefulWidget {
   final bool showFilter;
   final bool editable;
 
-  const PlotsPage({Key? key, this.showFilter = false, this.editable = true})
+  const PlantacionPage(
+      {Key? key, this.showFilter = false, this.editable = true})
       : super(key: key);
 
   @override
-  State<PlotsPage> createState() => _PlotsPageState();
+  State<PlantacionPage> createState() => _PlantacionPageState();
 }
 
-class _PlotsPageState extends State<PlotsPage> {
+class _PlantacionPageState extends State<PlantacionPage> {
   Timer? timer;
 
   @override
@@ -52,6 +53,7 @@ class _PlotsPageState extends State<PlotsPage> {
 
     final plots =
         widget.editable ? plotsProvider.plots : plotsProvider.plantReports;
+    // final plantacion = plotsProvider.plantacion;
     return Scaffold(
       backgroundColor:
           widget.showFilter ? Colors.white : const Color(0xFFF5F4F4),

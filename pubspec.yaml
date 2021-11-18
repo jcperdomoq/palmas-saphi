@@ -39,6 +39,7 @@ dependencies:
   flutter_secure_storage: ^4.2.0
   http: ^0.13.4
   geolocator: ^7.7.1
+  syncfusion_flutter_maps: ^19.3.54-beta
 
 dev_dependencies:
   flutter_test:

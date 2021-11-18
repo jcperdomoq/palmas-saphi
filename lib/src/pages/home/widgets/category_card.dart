@@ -22,9 +22,6 @@ class _CategoryCardState extends State<CategoryCard> {
 
   void onTap() {
     final plantsProvider = Provider.of<PlantsProvider>(context, listen: false);
-    // setState(() {
-    //   selected = !selected;
-    // });
     if (widget.category.name == 'Suelo' || widget.category.name == 'I+D') {
       plantsProvider.categoryAreaSelected = widget.category;
     } else {
