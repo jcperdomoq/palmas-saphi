@@ -59,13 +59,14 @@ class PlantacionElement {
         features: features ?? this.features,
       );
 
-  factory PlantacionElement.fromJson(Map<String, dynamic> json) =>
-      PlantacionElement(
-        type: json["type"],
-        name: json["name"],
-        features: List<Feature>.from(
-            json["features"].map((x) => Feature.fromJson(x))),
-      );
+  factory PlantacionElement.fromJson(Map<String, dynamic> json) {
+    return PlantacionElement(
+      type: json["type"],
+      name: json["name"],
+      features:
+          List<Feature>.from(json["features"].map((x) => Feature.fromJson(x))),
+    );
+  }
 
   Map<String, dynamic> toJson() => {
         "type": type,
@@ -100,11 +101,13 @@ class Feature {
         plantacion: plantacion ?? this.plantacion,
       );
 
-  factory Feature.fromJson(Map<String, dynamic> json) => Feature(
-        type: featureTypeValues.map?[json["type"]],
-        properties: Properties.fromJson(json["properties"]),
-        geometry: Geometry.fromJson(json["geometry"]),
-      );
+  factory Feature.fromJson(Map<String, dynamic> json) {
+    return Feature(
+      type: featureTypeValues.map?[json["type"]],
+      properties: Properties.fromJson(json["properties"]),
+      geometry: Geometry.fromJson(json["geometry"]),
+    );
+  }
 
   Map<String, dynamic> toJson() => {
         "type": featureTypeValues.reverse[type],
@@ -116,11 +119,11 @@ class Feature {
 class Geometry {
   Geometry({
     this.type,
-    this.coordinates,
+    this.coordinates = const [],
   });
 
   GeometryType? type;
-  List<MapLatLng>? coordinates;
+  List<MapLatLng> coordinates;
 
   Geometry copyWith({
     GeometryType? type,
@@ -134,26 +137,30 @@ class Geometry {
   factory Geometry.fromJson(Map<String, dynamic> json) {
     final List<MapLatLng> coordinates = [];
 
-    List<List<dynamic>>.from(
-        json["coordinates"].map((x) => List<dynamic>.from(x.map((x) {
-              if (x[0].runtimeType.toString() == 'double' ||
-                  x[0].runtimeType.toString() == 'int') {
-                coordinates.add(MapLatLng(x[0].toDouble(), x[1].toDouble()));
-              }
-            }))));
-    // json["coordinates"].map((x) {
-    //   print(x);
-    //   return x.map((y) {
-    //     // print(y);
-    //     if (y[0].runtimeType.toString() == 'double' ||
-    //         y[0].runtimeType.toString() == 'double') {
-    //       coordinates.add(MapLatLng(y[0], y[1]));
-    //     } else {
-    //       print('run: ${y[0].runtimeType} - ${y[1].runtimeType}');
-    //       return MapLatLng(y[0].toDouble(), y[1].toDouble());
-    //     }
-    //   });
-    // });
+    // List<List<dynamic>>.from(
+    //     json["coordinates"].map((x) => List<dynamic>.from(x.map((x) {
+    //           print(x);
+    //           if (x[0].runtimeType.toString() == 'double' ||
+    //               x[0].runtimeType.toString() == 'int') {
+    //             coordinates.add(MapLatLng(x[1].toDouble(), x[0].toDouble()));
+    //           }
+    //         }))));
+    json["coordinates"].forEach((e) {
+      // if (e.runtimeType.toString() == 'String') {
+      //   e = e.split(',');
+      // }
+      if (e.runtimeType.toString() == 'String') {
+        e = e.replaceAll('[', '').replaceAll(']', '').split(',');
+        coordinates.add(MapLatLng(double.parse(e[0]), double.parse(e[1])));
+        return;
+      }
+      e.forEach((x) {
+        if (x[0].runtimeType.toString() == 'double' ||
+            x[0].runtimeType.toString() == 'int') {
+          coordinates.add(MapLatLng(x[1].toDouble(), x[0].toDouble()));
+        }
+      });
+    });
 
     return Geometry(
       type: geometryTypeValues.map?[json["type"]],
@@ -161,12 +168,19 @@ class Geometry {
     );
   }
 
-  Map<String, dynamic> toJson() => {
-        "type": geometryTypeValues.reverse[type],
-        "coordinates": List<dynamic>.from(coordinates ??
-            [].map((x) => List<dynamic>.from(
-                x.map((x) => List<dynamic>.from(x.map((x) => x)))))),
-      };
+  Map<String, dynamic> toJson() {
+    // print('que mierda $coordinates');
+    final coorToJson = [];
+    for (final x in coordinates) {
+      final temp = [x.latitude, x.longitude];
+      coorToJson.add(jsonEncode(temp));
+    }
+    // print(coorToJson);
+    return {
+      "type": geometryTypeValues.reverse[type],
+      "coordinates": coorToJson,
+    };
+  }
 }
 
 enum GeometryType { POLYGON, MULTI_POLYGON }

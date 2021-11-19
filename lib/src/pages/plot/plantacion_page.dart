@@ -7,6 +7,7 @@ import 'package:las_palmas/models/api/plots.dart';
 import 'package:las_palmas/src/pages/plants/plant_page.dart';
 import 'package:las_palmas/src/pages/plot/widgets/category_label.dart';
 import 'package:las_palmas/src/pages/plot/widgets/empty_message.dart';
+import 'package:las_palmas/src/providers/plants_provider.dart';
 import 'package:las_palmas/src/providers/plots_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -41,19 +42,24 @@ class _PlantacionPageState extends State<PlantacionPage> {
 
   loadPeriodicData() {
     final plotsProvider = Provider.of<PlotsProvider>(context);
-    plotsProvider.loadStorageData();
+    plotsProvider.loadPlantacionFromStorage();
     timer = Timer.periodic(const Duration(minutes: 1), (timer) {
-      plotsProvider.loadStorageData();
+      plotsProvider.loadPlantacionFromStorage();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final plotsProvider = Provider.of<PlotsProvider>(context);
+    final plantsProvider = Provider.of<PlantsProvider>(context, listen: false);
+    final areaCategory = plantsProvider.categoryAreaSelected?.name;
+    final evaluationCategory = plantsProvider.categoriesEvaluationSelected
+        .map((e) => e.name)
+        .join('_');
 
-    final plots =
-        widget.editable ? plotsProvider.plots : plotsProvider.plantReports;
-    // final plantacion = plotsProvider.plantacion;
+    // final plots =
+    //     widget.editable ? plotsProvider.plots : plotsProvider.plantReports;
+    final features = plotsProvider.features;
     return Scaffold(
       backgroundColor:
           widget.showFilter ? Colors.white : const Color(0xFFF5F4F4),
@@ -77,31 +83,44 @@ class _PlantacionPageState extends State<PlantacionPage> {
               const SizedBox(height: 10),
               if (widget.editable) const CategoryLabel(),
               Expanded(
-                child: plots.isNotEmpty
+                child: features.isNotEmpty
                     ? SingleChildScrollView(
                         child: Column(
                           children: [
                             const SizedBox(height: 30),
-                            ...plots.map<Widget>(
-                              (plot) {
-                                final plants = plot.plants;
-                                final hasGreen = !widget.editable
-                                    ? const Color(0xFF00C347)
-                                    : plants.indexWhere((plot) =>
-                                        plot.color == const Color(0xFF00C347));
-                                // final hasGreen = !editable;
+                            ...features.map<Widget>(
+                              (feature) {
                                 return Column(
                                   children: [
-                                    labelCard(
-                                      label: plot.name ?? '',
-                                      verticalPadding: 16,
-                                      width: double.infinity,
-                                      color: hasGreen != -1
-                                          ? const Color(0xFF00C347)
-                                          : const Color(0xFFF92B77),
+                                    GestureDetector(
+                                      onTap: () {
+                                        openDetailPlant(
+                                            context,
+                                            Plant(
+                                              type:
+                                                  '${areaCategory}_$evaluationCategory',
+                                              plantacion: feature.plantacion,
+                                              parcela:
+                                                  feature.properties!.parcela,
+                                              campania:
+                                                  feature.properties!.campaa,
+                                            ),
+                                            Plots(
+                                              id: feature.properties!.campaa,
+                                              name: feature.properties!.campaa,
+                                            ),
+                                            const Color(0xFF00C347));
+                                      },
+                                      child: labelCard(
+                                        label:
+                                            '${feature.properties!.parcela} (Campaña ${feature.properties!.campaa})',
+                                        verticalPadding: 16,
+                                        width: double.infinity,
+                                        color: const Color(0xFF00C347),
+                                      ),
                                     ),
                                     const SizedBox(height: 10),
-                                    listPlots(plot, plants),
+                                    // listPlots(plot, plants),
                                   ],
                                 );
                               },
@@ -147,7 +166,7 @@ class _PlantacionPageState extends State<PlantacionPage> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             labelCard(
-              label: 'Linea ${plant.line}, Planta ${plant.plant}',
+              label: 'Linea ${plant.linea}, Planta ${plant.planta}',
               verticalPadding: 5,
               color: statusColor,
               width: MediaQuery.of(context).size.width * 0.8,

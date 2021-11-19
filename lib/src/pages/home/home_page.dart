@@ -7,7 +7,6 @@ import 'package:flutter/widgets.dart';
 import 'package:las_palmas/models/home/category.dart';
 import 'package:las_palmas/src/pages/home/widgets/category_card.dart';
 import 'package:las_palmas/src/pages/plot/plantacion_page.dart';
-import 'package:las_palmas/src/pages/plot/plots_page.dart';
 import 'package:las_palmas/src/widgets/custom_buttom.dart';
 
 class HomePage extends StatelessWidget {
@@ -58,8 +57,8 @@ class HomePage extends StatelessWidget {
     Navigator.push(
       context,
       CupertinoPageRoute(
-        // builder: (context) => const PlantacionPage(),
-        builder: (context) => const PlotsPage(),
+        builder: (context) => const PlantacionPage(),
+        // builder: (context) => const PlotsPage(),
       ),
     );
   }

@@ -39,6 +39,8 @@ class PlotsProvider with ChangeNotifier {
   String tratamiento = '';
   TextEditingController circunferenciaController = TextEditingController();
 
+  TextEditingController lineaController = TextEditingController();
+  TextEditingController plantaController = TextEditingController();
   TextEditingController hojasVerdesController = TextEditingController();
   TextEditingController stpAnchoController = TextEditingController();
   TextEditingController stpEspesorController = TextEditingController();
@@ -85,24 +87,18 @@ class PlotsProvider with ChangeNotifier {
     await plotService.getPlantacion().then((response) {
       plantacion = response;
       if (plantacion != null) {
-        plantacion!.plantacion.map((p) {
-          p.features.map((f) {
-            if (currentLocation != null &&
-                f.geometry != null &&
-                f.geometry!.coordinates != null) {
-              if (FilterCoordinates.checkIfValidMarker(
-                  MapLatLng(
-                      currentLocation!.latitude, currentLocation!.longitude),
-                  f.geometry!.coordinates!)) {
-                features.add(f);
-                f = f.copyWith(plantacion: p.name);
-              }
-            }
-          });
-        });
+        filterFeaturesByPolygon();
+        updateDownloadTime();
+        saveData(
+          key: nameList,
+          data: jsonEncode(plantacion!.toJson()),
+        );
       }
-      print(plantacion);
     });
+    // }).catchError((onError) {
+    //   print(onError);
+    //   status = HttpStatus.internalServerError;
+    // });
     return status;
   }
 
@@ -123,26 +119,51 @@ class PlotsProvider with ChangeNotifier {
     return status;
   }
 
-  filterPlotsByDistance() {
-    plots = [];
-    for (final plot in allPlots) {
-      for (final plant in plot.plants) {
-        if (calculateDistance(
-              plant.lat!,
-              plant.lng!,
-              currentLocation!.latitude,
-              currentLocation!.longitude,
-            ).round() <=
-            distanceMeters) {
-          if (plots.any((p) => p.id == plot.id)) {
-            plots.firstWhere((p) => p.id == plot.id).plants.add(plant);
-          } else {
-            plots.add(Plots(id: plot.id, name: plot.name, plants: [plant]));
+  filterFeaturesByPolygon() {
+    if (plantacion != null) {
+      (plantacion!.plantacion).map((p) {
+        p.features.map((f) {
+          if (currentLocation != null && f.geometry != null) {
+            // features.add(f);
+            // f.plantacion = p.name;
+            // TODO: validar coordenadas
+            final check = FilterCoordinates.checkIfValidMarker(
+                MapLatLng(
+                    currentLocation!.latitude, currentLocation!.longitude),
+                f.geometry!.coordinates);
+            // print(
+            //     'currentLocation $currentLocation, geometry: ${f.geometry!.coordinates} check $check');
+            if (check) {
+              features.add(f);
+              f.plantacion = p.name;
+            }
           }
-        }
-      }
+        }).toList();
+      }).toList();
     }
     notifyListeners();
+  }
+
+  filterPlotsByDistance() {
+    // plots = [];
+    // for (final plot in allPlots) {
+    //   for (final plant in plot.plants) {
+    //     if (calculateDistance(
+    //           plant.lat!,
+    //           plant.lng!,
+    //           currentLocation!.latitude,
+    //           currentLocation!.longitude,
+    //         ).round() <=
+    //         distanceMeters) {
+    //       if (plots.any((p) => p.id == plot.id)) {
+    //         plots.firstWhere((p) => p.id == plot.id).plants.add(plant);
+    //       } else {
+    //         plots.add(Plots(id: plot.id, name: plot.name, plants: [plant]));
+    //       }
+    //     }
+    //   }
+    // }
+    // notifyListeners();
   }
 
   /// Permite asignar el color de las parcelas y plantas
@@ -184,6 +205,15 @@ class PlotsProvider with ChangeNotifier {
       _determinePosition();
       filterPlotsByDistance();
     } catch (_) {}
+  }
+
+  Future<void> loadPlantacionFromStorage() async {
+    const storage = FlutterSecureStorage();
+    final res = await storage.read(key: nameList);
+    plantacion = res != null ? Plantacion.fromJson(json.decode(res)) : null;
+    await _determinePosition();
+    filterFeaturesByPolygon();
+    // filterPlotsByDistance();
   }
 
   Future<void> saveData({required String key, required String data}) async {
@@ -299,7 +329,7 @@ class PlotsProvider with ChangeNotifier {
     List<Plant> onlyPlants = [];
     onlyPlants.addAll(reports.map((plot) => plot.plants).expand((i) => i));
     final parseToJson = onlyPlants.map((plant) => plant.toJson()).toList();
-    plotService.saveReports(
+    await plotService.saveReports(
       parseToJson,
     );
   }
@@ -318,5 +348,28 @@ class PlotsProvider with ChangeNotifier {
       key: CacheKey.downloadDateTime.toString(),
       data: downloadDateTime.toString(),
     );
+  }
+
+  resetFields() {
+    dniController.text = '';
+    campaniaController.text = '';
+    ensayo = '';
+    bloque = '';
+    tratamiento = '';
+    circunferenciaController.text = '';
+    lineaController.text = '';
+    plantaController.text = '';
+    hojasVerdesController.text = '';
+    stpAnchoController.text = '';
+    stpEspesorController.text = '';
+    numeroFoliolosController.text = '';
+    largoFoliolosController.text = '';
+    anchoFoliolosController.text = '';
+    longPecioloController.text = '';
+    longRaquizController.text = '';
+    alturaPlantaController.text = '';
+    longArqueoController.text = '';
+    deficienciaNutricional = [];
+    observacionController.text = '';
   }
 }

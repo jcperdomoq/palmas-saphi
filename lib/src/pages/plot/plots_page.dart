@@ -145,7 +145,7 @@ class _PlotsPageState extends State<PlotsPage> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             labelCard(
-              label: 'Linea ${plant.line}, Planta ${plant.plant}',
+              label: 'Linea ${plant.linea}, Planta ${plant.planta}',
               verticalPadding: 5,
               color: statusColor,
               width: MediaQuery.of(context).size.width * 0.8,

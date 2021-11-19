@@ -3,13 +3,19 @@ import 'package:syncfusion_flutter_maps/maps.dart';
 class FilterCoordinates {
   static bool checkIfValidMarker(MapLatLng tap, List<MapLatLng> vertices) {
     int intersectCount = 0;
+    bool intersecCoords = false;
     for (int j = 0; j < vertices.length - 1; j++) {
       if (_rayCastIntersect(tap, vertices[j], vertices[j + 1])) {
         intersectCount++;
       }
+      if (tap.latitude == vertices[j].latitude &&
+          tap.longitude == vertices[j].longitude) {
+        intersecCoords = true;
+      }
     }
 
-    return ((intersectCount % 2) == 1); // odd = inside, even = outside;
+    return ((intersectCount % 2) == 1) ||
+        intersecCoords; // odd = inside, even = outside;
   }
 
   static bool _rayCastIntersect(

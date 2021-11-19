@@ -169,16 +169,16 @@ class _SynchronizationPageState extends State<SynchronizationPage> {
     );
   }
 
-  synchronization() {
+  synchronization() async {
     setState(() {
       stateSeendForm = '(EN PROCESO)';
     });
     final plotsProvider = Provider.of<PlotsProvider>(context, listen: false);
 
-    plotsProvider.saveReports(plotsProvider.plantReports);
+    await plotsProvider.saveReports(plotsProvider.plantReports);
 
-    plotsProvider.clearReports();
-    plotsProvider.loadColorPlots([]);
+    // plotsProvider.clearReports();
+    // plotsProvider.loadColorPlots([]);
     setState(() {
       stateSeendForm = '(OK)';
     });
@@ -199,8 +199,8 @@ class _SynchronizationPageState extends State<SynchronizationPage> {
       stateDownload = "(EN PROCESO)";
     });
 
-    // final status = await plotsProvider.loadPlantacionFromServer();
-    final status = await plotsProvider.loadPlotsFromServer();
+    final status = await plotsProvider.loadPlantacionFromServer();
+    // final status = await plotsProvider.loadPlotsFromServer();
     if (status == HttpStatus.ok) {
       setState(() {
         stateDownload = "(OK)";

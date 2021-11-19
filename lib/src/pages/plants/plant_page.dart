@@ -20,7 +20,7 @@ class PlantPage extends StatelessWidget {
   final Plant plant;
   final Plots plot;
   final Color statusColor;
-  const PlantPage({
+  PlantPage({
     Key? key,
     required this.plot,
     required this.plant,
@@ -35,6 +35,8 @@ class PlantPage extends StatelessWidget {
 
     final isID = plantsProvider.containsForName('I+D');
     final isBiometrica = plantsProvider.containsForName('Biometría');
+    plotsProvider.campaniaController.text = plant.campania!;
+    print(plant);
     return Scaffold(
       backgroundColor: const Color(0xFFF5F4F4),
       appBar: buildAppbar(context),
@@ -70,16 +72,16 @@ class PlantPage extends StatelessWidget {
                         : plant.dniEvaluador,
                     ctrl: plotsProvider.dniController,
                   ),
-                  const LabelField(
-                    label: 'Plantación',
-                    value: 'Definir por API', // TODO: definir por API
-                    disabled: true,
-                    // ctrl: plotsProvider.dniController,
-                  ),
                   LabelField(
                     label: 'Parcela',
-                    value: plot.name,
+                    value: plant.parcela,
                     disabled: true,
+                  ),
+                  LabelField(
+                    label: 'Plantación',
+                    value: plant.plantacion,
+                    disabled: true,
+                    // ctrl: plotsProvider.dniController,
                   ),
                   LabelField(
                     label: 'Campaña',
@@ -96,12 +98,12 @@ class PlantPage extends StatelessWidget {
                       label: 'Ensayo',
                       value: plant.ensayo,
                       onTap: () async {
-                        String plantacion = 'shanuci';
+                        String plantacion = plant.plantacion ?? '';
                         final items = await Dialogs.showMultiSelect(
                           context,
                           multiSelect: false,
                           title: 'Ensayo',
-                          items: plantacion == 'shanuci'
+                          items: plantacion == 'Shanusi'
                               ? Ensayo.shanusiItems
                               : Ensayo.plantawasiItems,
                           initialSelectedValues: [plotsProvider.ensayo],
@@ -176,13 +178,17 @@ class PlantPage extends StatelessWidget {
                     ),
                   LabelField(
                     label: 'Linea',
-                    value: '${plant.line}',
-                    disabled: true,
+                    value: editable
+                        ? plotsProvider.lineaController.text
+                        : plant.linea,
+                    ctrl: plotsProvider.lineaController,
                   ),
                   LabelField(
                     label: 'Planta',
-                    value: '${plant.plant}',
-                    disabled: true,
+                    value: editable
+                        ? plotsProvider.plantaController.text
+                        : plant.planta,
+                    ctrl: plotsProvider.plantaController,
                   ),
                   if (isBiometrica ||
                       (!editable &&
@@ -394,9 +400,11 @@ class PlantPage extends StatelessWidget {
       circunferencia: plotsProvider.circunferenciaController.text,
       deficienciaNutricional: plotsProvider.deficienciaNutricional,
       observacion: plotsProvider.observacionController.text,
-      plotId: plot.id,
-      plantId: plant.id,
+      planta: plotsProvider.plantaController.text,
+      linea: plotsProvider.lineaController.text,
     );
+
+    print(plantToSave);
 
     await plotsProvider.loadPlotReports();
     final reports = plotsProvider.plantReports;
@@ -420,6 +428,7 @@ class PlantPage extends StatelessWidget {
       data: jsonEncode(List<dynamic>.from(reports.map((x) => x.toJson()))),
     );
     plotsProvider.loadColorPlots(reports);
+    plotsProvider.resetFields();
     Navigator.of(context).pop();
   }
 

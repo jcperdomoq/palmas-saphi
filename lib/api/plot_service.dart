@@ -26,11 +26,12 @@ class PlotService {
   }
 
   Future<void> saveReports(List<Map<String, dynamic>> plants) async {
-    print(plants);
-    await http.post(
-      Uri.parse("https://palmas.ga/plot/plant"),
+    print('json: ${json.encode(plants)}');
+    final res = await http.post(
+      Uri.parse("https://palmas.ga/plantation"),
       headers: {"Content-Type": "application/json"},
       body: json.encode(plants),
     );
+    print(res.body);
   }
 }
