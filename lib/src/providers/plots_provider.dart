@@ -120,6 +120,7 @@ class PlotsProvider with ChangeNotifier {
   }
 
   filterFeaturesByPolygon() {
+    features = [];
     if (plantacion != null) {
       (plantacion!.plantacion).map((p) {
         p.features.map((f) {
