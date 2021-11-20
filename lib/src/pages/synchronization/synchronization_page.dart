@@ -79,7 +79,7 @@ class _SynchronizationPageState extends State<SynchronizationPage> {
                   Row(
                     children: [
                       label(
-                        'Descarga de reportes',
+                        'Subida de formularios',
                         const Color(0xFF828282),
                       ),
                       const Spacer(),
@@ -95,7 +95,7 @@ class _SynchronizationPageState extends State<SynchronizationPage> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      child: const Text('Sincronizar'),
+                      child: const Text('Subir formularios'),
                       onPressed: synchronization,
                       style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all<Color>(
@@ -136,7 +136,7 @@ class _SynchronizationPageState extends State<SynchronizationPage> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      child: const Text('Descargar informacion'),
+                      child: const Text('Actualizar BD Aplicación'),
                       style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all<Color>(
                           const Color(0xFF00C347),
@@ -175,13 +175,17 @@ class _SynchronizationPageState extends State<SynchronizationPage> {
     });
     final plotsProvider = Provider.of<PlotsProvider>(context, listen: false);
 
-    await plotsProvider.saveReports(plotsProvider.plantReports);
-
-    // plotsProvider.clearReports();
-    // plotsProvider.loadColorPlots([]);
+    final status = await plotsProvider.saveReports(plotsProvider.plantReports);
+    if (status == HttpStatus.ok) {
+      plotsProvider.clearReports();
+      plotsProvider.loadColorPlots([]);
+    }
     setState(() {
-      stateSeendForm = '(OK)';
+      stateSeendForm = status == HttpStatus.ok ? '(OK)' : '(Error)';
+      showErrorConnextionWidget = status == HttpStatus.serviceUnavailable;
     });
+    await Future.delayed(const Duration(seconds: 5));
+    setState(() => showErrorConnextionWidget = false);
   }
 
   Text label(String label, Color color) {
@@ -206,7 +210,7 @@ class _SynchronizationPageState extends State<SynchronizationPage> {
         stateDownload = "(OK)";
       });
     } else {
-      mensajeError();
+      mensajeError(status);
     }
 
     // plotsProvider.loadPlotsFromServer().then((value) {
@@ -221,9 +225,9 @@ class _SynchronizationPageState extends State<SynchronizationPage> {
     // });
   }
 
-  mensajeError() async {
+  mensajeError(int status) async {
     setState(() {
-      showErrorConnextionWidget = true;
+      showErrorConnextionWidget = status == HttpStatus.serviceUnavailable;
       stateDownload = "(Error)";
     });
     await Future.delayed(const Duration(seconds: 5));

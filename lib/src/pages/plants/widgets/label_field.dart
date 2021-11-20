@@ -25,11 +25,11 @@ class LabelField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (ctrl != null) {
+    if (ctrl != null && disabled) {
       ctrl!.text = value ?? '';
     }
     return GestureDetector(
-      onTap: editable
+      onTap: editable && !disabled
           ? () {
               if (onTap != null) {
                 onTap!();

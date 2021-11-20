@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:las_palmas/src/providers/plots_provider.dart';
-import 'package:las_palmas/src/widgets/custom_buttom.dart';
 import 'package:provider/provider.dart';
 
 class ConfigurationPage extends StatefulWidget {
@@ -54,26 +53,6 @@ class _ConfigurationPageState extends State<ConfigurationPage> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 40),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 40),
-                      child: CustomButton(
-                        label: 'Guardar', onTap: null, // TODO: Unimplemented
-                      ),
-                    ),
-                    const Spacer(),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 40),
-                      child: Text(
-                        'Datos Sincronizados el 12 de Octubre del 2020 a las 15:20',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Color(0xFF828282),
-                          fontSize: 15,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 40),
                   ],
                 ),
               ),

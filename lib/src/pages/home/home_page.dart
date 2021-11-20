@@ -7,7 +7,11 @@ import 'package:flutter/widgets.dart';
 import 'package:las_palmas/models/home/category.dart';
 import 'package:las_palmas/src/pages/home/widgets/category_card.dart';
 import 'package:las_palmas/src/pages/plot/plantacion_page.dart';
+import 'package:las_palmas/src/providers/plants_provider.dart';
+import 'package:las_palmas/src/providers/plots_provider.dart';
 import 'package:las_palmas/src/widgets/custom_buttom.dart';
+import 'package:las_palmas/util/dialogs.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatelessWidget {
   final Map<String, List<Category>> categories = {
@@ -54,6 +58,23 @@ class HomePage extends StatelessWidget {
   }
 
   goToPlotPage(context) {
+    final plantsProvider = Provider.of<PlantsProvider>(context, listen: false);
+    String areaCategory = plantsProvider.categoryAreaSelected != null
+        ? plantsProvider.categoryAreaSelected!.name
+        : 'Suelo';
+    final evaluationCategory = plantsProvider.categoriesEvaluationSelected
+        .map((e) => e.name)
+        .join('_');
+
+    if (areaCategory == 'Suelo' && evaluationCategory == 'Biometría') {
+      Dialogs.nativeDialog(
+        context: context,
+        body: 'Combinación de área y evaluación incorrecta',
+        acceptText: 'Aceptar',
+      );
+      return;
+    }
+    Provider.of<PlotsProvider>(context, listen: false).loadPeriodicData();
     Navigator.push(
       context,
       CupertinoPageRoute(

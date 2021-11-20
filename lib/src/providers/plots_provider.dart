@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
@@ -14,6 +15,7 @@ import 'package:las_palmas/util/filter_coordinates.dart';
 import 'package:syncfusion_flutter_maps/maps.dart';
 
 class PlotsProvider with ChangeNotifier {
+  Timer? timer;
   final nameList = 'plots';
 
   late PlotService plotService;
@@ -32,25 +34,27 @@ class PlotsProvider with ChangeNotifier {
   Position? currentLocation;
   int distanceMeters = 1500;
 
-  TextEditingController dniController = TextEditingController();
-  TextEditingController campaniaController = TextEditingController();
   String ensayo = '';
   String bloque = '';
   String tratamiento = '';
-  TextEditingController circunferenciaController = TextEditingController();
 
-  TextEditingController lineaController = TextEditingController();
-  TextEditingController plantaController = TextEditingController();
-  TextEditingController hojasVerdesController = TextEditingController();
-  TextEditingController stpAnchoController = TextEditingController();
-  TextEditingController stpEspesorController = TextEditingController();
-  TextEditingController numeroFoliolosController = TextEditingController();
-  TextEditingController largoFoliolosController = TextEditingController();
-  TextEditingController anchoFoliolosController = TextEditingController();
-  TextEditingController longPecioloController = TextEditingController();
-  TextEditingController longRaquizController = TextEditingController();
-  TextEditingController alturaPlantaController = TextEditingController();
-  TextEditingController longArqueoController = TextEditingController();
+  final TextEditingController dniController = TextEditingController();
+  final TextEditingController campaniaController = TextEditingController();
+  final TextEditingController circunferenciaController =
+      TextEditingController();
+  final TextEditingController lineaController = TextEditingController();
+  final TextEditingController plantaController = TextEditingController();
+  final TextEditingController hojasVerdesController = TextEditingController();
+  final TextEditingController stpAnchoController = TextEditingController();
+  final TextEditingController stpEspesorController = TextEditingController();
+  final TextEditingController numeroFoliolosController =
+      TextEditingController();
+  final TextEditingController largoFoliolosController = TextEditingController();
+  final TextEditingController anchoFoliolosController = TextEditingController();
+  final TextEditingController longPecioloController = TextEditingController();
+  final TextEditingController longRaquizController = TextEditingController();
+  final TextEditingController alturaPlantaController = TextEditingController();
+  final TextEditingController longArqueoController = TextEditingController();
   List<String> deficienciaNutricional = [];
   TextEditingController observacionController = TextEditingController();
 
@@ -93,12 +97,16 @@ class PlotsProvider with ChangeNotifier {
           key: nameList,
           data: jsonEncode(plantacion!.toJson()),
         );
+      } else {
+        status = HttpStatus.internalServerError;
       }
+    }).catchError((onError) {
+      status = HttpStatus.internalServerError;
+      if (onError is SocketException) {
+        status = HttpStatus.serviceUnavailable;
+      }
+      notifyListeners();
     });
-    // }).catchError((onError) {
-    //   print(onError);
-    //   status = HttpStatus.internalServerError;
-    // });
     return status;
   }
 
@@ -127,14 +135,22 @@ class PlotsProvider with ChangeNotifier {
           if (currentLocation != null && f.geometry != null) {
             // features.add(f);
             // f.plantacion = p.name;
-            // TODO: validar coordenadas
+
             final check = FilterCoordinates.checkIfValidMarker(
                 MapLatLng(
                     currentLocation!.latitude, currentLocation!.longitude),
                 f.geometry!.coordinates);
-            // print(
-            //     'currentLocation $currentLocation, geometry: ${f.geometry!.coordinates} check $check');
-            if (check) {
+
+            bool hasNearbyPoints = false;
+            for (final MapLatLng c in f.geometry!.coordinates) {
+              if (calculateDistance(c.latitude, c.longitude,
+                      currentLocation!.latitude, currentLocation!.longitude) <
+                  distanceMeters) {
+                hasNearbyPoints = true;
+                break;
+              }
+            }
+            if (check || hasNearbyPoints) {
               features.add(f);
               f.plantacion = p.name;
             }
@@ -143,6 +159,19 @@ class PlotsProvider with ChangeNotifier {
       }).toList();
     }
     notifyListeners();
+  }
+
+  bool plantIsInspected(Plant p) {
+    for (final plot in plantReports) {
+      for (final plant in plot.plants) {
+        if (p.parcela == plant.parcela &&
+            p.campania == plant.campania &&
+            p.plantacion == plant.plantacion) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   filterPlotsByDistance() {
@@ -326,13 +355,24 @@ class PlotsProvider with ChangeNotifier {
     return (12742 * asin(sqrt(a))) * 1000;
   }
 
-  saveReports(List<Plots> reports) async {
+  Future<int> saveReports(List<Plots> reports) async {
+    int status = HttpStatus.ok;
     List<Plant> onlyPlants = [];
     onlyPlants.addAll(reports.map((plot) => plot.plants).expand((i) => i));
     final parseToJson = onlyPlants.map((plant) => plant.toJson()).toList();
-    await plotService.saveReports(
-      parseToJson,
-    );
+    await plotService.saveReports(parseToJson).then((res) {
+      if (res == HttpStatus.ok) {
+        return status;
+      }
+      return HttpStatus.internalServerError;
+    }).catchError((onError) {
+      status = HttpStatus.internalServerError;
+      if (onError is SocketException) {
+        status = HttpStatus.serviceUnavailable;
+      }
+      return status;
+    });
+    return status;
   }
 
   updateSyncTime() {
@@ -372,5 +412,16 @@ class PlotsProvider with ChangeNotifier {
     longArqueoController.text = '';
     deficienciaNutricional = [];
     observacionController.text = '';
+  }
+
+  loadPeriodicData() {
+    if (timer != null) {
+      timer!.cancel();
+    }
+
+    loadPlantacionFromStorage();
+    timer = Timer.periodic(const Duration(minutes: 1), (timer) {
+      loadPlantacionFromStorage();
+    });
   }
 }

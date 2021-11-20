@@ -30,18 +30,18 @@ class ErrorInternetWidget extends StatelessWidget {
             color: Colors.grey[400]!,
           ),
           const SizedBox(height: 60),
-          const Spacer(),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 40),
-            child: Text(
-              'Datos Sincronizados el 12 de Octubre del 2020 a las 15:20',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Color(0xFF828282),
-                fontSize: 15,
-              ),
-            ),
-          ),
+          // const Spacer(),
+          // const Padding(
+          //   padding: EdgeInsets.symmetric(horizontal: 40),
+          //   child: Text(
+          //     'Datos Sincronizados el 12 de Octubre del 2020 a las 15:20',
+          //     textAlign: TextAlign.center,
+          //     style: TextStyle(
+          //       color: Color(0xFF828282),
+          //       fontSize: 15,
+          //     ),
+          //   ),
+          // ),
           const SizedBox(height: 40),
         ],
       ),

@@ -33,6 +33,9 @@ class _TabbarBottomState extends State<TabbarBottom> {
   }
 
   _onItemTapped(index) {
+    if (index == 0) {
+      Provider.of<PlotsProvider>(context, listen: false).loadPeriodicData();
+    }
     // _pageController.jumpToPage(index);
     _tabController.jumpToTab(index);
     setState(() {

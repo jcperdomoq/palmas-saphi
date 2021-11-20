@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -24,30 +22,6 @@ class PlantacionPage extends StatefulWidget {
 }
 
 class _PlantacionPageState extends State<PlantacionPage> {
-  Timer? timer;
-
-  @override
-  void didChangeDependencies() {
-    if (timer == null) {
-      loadPeriodicData();
-    }
-    super.didChangeDependencies();
-  }
-
-  @override
-  void dispose() {
-    timer?.cancel();
-    super.dispose();
-  }
-
-  loadPeriodicData() {
-    final plotsProvider = Provider.of<PlotsProvider>(context);
-    plotsProvider.loadPlantacionFromStorage();
-    timer = Timer.periodic(const Duration(minutes: 1), (timer) {
-      plotsProvider.loadPlantacionFromStorage();
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final plotsProvider = Provider.of<PlotsProvider>(context);
@@ -94,22 +68,24 @@ class _PlantacionPageState extends State<PlantacionPage> {
                                   children: [
                                     GestureDetector(
                                       onTap: () {
+                                        final plant = Plant(
+                                          type:
+                                              '${areaCategory}_$evaluationCategory',
+                                          plantacion: feature.plantacion,
+                                          parcela: feature.properties!.parcela,
+                                          campania: feature.properties!.campaa,
+                                        );
                                         openDetailPlant(
-                                            context,
-                                            Plant(
-                                              type:
-                                                  '${areaCategory}_$evaluationCategory',
-                                              plantacion: feature.plantacion,
-                                              parcela:
-                                                  feature.properties!.parcela,
-                                              campania:
-                                                  feature.properties!.campaa,
-                                            ),
-                                            Plots(
-                                              id: feature.properties!.campaa,
-                                              name: feature.properties!.campaa,
-                                            ),
-                                            const Color(0xFF00C347));
+                                          context,
+                                          plant,
+                                          Plots(
+                                            id: feature.properties!.campaa,
+                                            name: feature.properties!.campaa,
+                                          ),
+                                          plotsProvider.plantIsInspected(plant)
+                                              ? const Color(0xFF00C347)
+                                              : const Color(0xFFF92B77),
+                                        );
                                       },
                                       child: labelCard(
                                         label:
@@ -120,7 +96,6 @@ class _PlantacionPageState extends State<PlantacionPage> {
                                       ),
                                     ),
                                     const SizedBox(height: 10),
-                                    // listPlots(plot, plants),
                                   ],
                                 );
                               },
@@ -151,36 +126,13 @@ class _PlantacionPageState extends State<PlantacionPage> {
     );
   }
 
-  ListView listPlots(Plots plot, List<Plant> plants) {
-    return ListView.builder(
-      itemCount: plants.length,
-      shrinkWrap: true,
-      padding: const EdgeInsets.only(bottom: 10),
-      physics: const NeverScrollableScrollPhysics(),
-      itemBuilder: (context, index) {
-        final plant = plants[index];
-        final statusColor = !widget.editable
-            ? const Color(0xFF00C347)
-            : plant.color ?? const Color(0xFFF92B77);
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            labelCard(
-              label: 'Linea ${plant.linea}, Planta ${plant.planta}',
-              verticalPadding: 5,
-              color: statusColor,
-              width: MediaQuery.of(context).size.width * 0.8,
-              onTap: () => openDetailPlant(context, plant, plot, statusColor),
-            ),
-            const SizedBox(height: 10),
-          ],
-        );
-      },
-    );
-  }
-
   openDetailPlant(
-      BuildContext context, Plant plant, Plots plot, Color statusColor) {
+    BuildContext context,
+    Plant plant,
+    Plots plot,
+    Color statusColor,
+  ) {
+    Provider.of<PlotsProvider>(context, listen: false).resetFields();
     Navigator.of(context).push(
       CupertinoPageRoute(
         builder: (context) => PlantPage(

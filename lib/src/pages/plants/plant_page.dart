@@ -20,7 +20,7 @@ class PlantPage extends StatelessWidget {
   final Plant plant;
   final Plots plot;
   final Color statusColor;
-  PlantPage({
+  const PlantPage({
     Key? key,
     required this.plot,
     required this.plant,
@@ -33,10 +33,10 @@ class PlantPage extends StatelessWidget {
     final plantsProvider = Provider.of<PlantsProvider>(context);
     final plotsProvider = Provider.of<PlotsProvider>(context, listen: false);
 
+    final isSuelo = plantsProvider.containsForName('Suelo');
     final isID = plantsProvider.containsForName('I+D');
     final isBiometrica = plantsProvider.containsForName('Biometría');
     plotsProvider.campaniaController.text = plant.campania!;
-    print(plant);
     return Scaffold(
       backgroundColor: const Color(0xFFF5F4F4),
       appBar: buildAppbar(context),
@@ -71,6 +71,7 @@ class PlantPage extends StatelessWidget {
                         ? plotsProvider.dniController.text
                         : plant.dniEvaluador,
                     ctrl: plotsProvider.dniController,
+                    disabled: !editable,
                   ),
                   LabelField(
                     label: 'Parcela',
@@ -89,6 +90,7 @@ class PlantPage extends StatelessWidget {
                         ? plotsProvider.campaniaController.text
                         : plant.campania,
                     ctrl: plotsProvider.campaniaController,
+                    disabled: true,
                   ),
                   if (isID ||
                       (!editable &&
@@ -97,6 +99,7 @@ class PlantPage extends StatelessWidget {
                     LabelField(
                       label: 'Ensayo',
                       value: plant.ensayo,
+                      disabled: !editable,
                       onTap: () async {
                         String plantacion = plant.plantacion ?? '';
                         final items = await Dialogs.showMultiSelect(
@@ -120,6 +123,7 @@ class PlantPage extends StatelessWidget {
                     LabelField(
                       label: 'Bloque',
                       value: plant.bloque,
+                      disabled: !editable,
                       onTap: () async {
                         String ensayo = plotsProvider.ensayo;
                         final dataDialog = ensayo == 'ASD' ||
@@ -149,8 +153,9 @@ class PlantPage extends StatelessWidget {
                           plant.tratamiento != null &&
                           plant.tratamiento!.isNotEmpty))
                     LabelField(
-                      label: 'Símbolo tratamiento',
+                      label: 'Tratamiento',
                       value: plant.tratamiento,
+                      disabled: !editable,
                       onTap: () async {
                         String ensayo = plotsProvider.ensayo;
                         final items = await Dialogs.showMultiSelect(context,
@@ -182,6 +187,7 @@ class PlantPage extends StatelessWidget {
                         ? plotsProvider.lineaController.text
                         : plant.linea,
                     ctrl: plotsProvider.lineaController,
+                    disabled: !editable,
                   ),
                   LabelField(
                     label: 'Planta',
@@ -189,6 +195,7 @@ class PlantPage extends StatelessWidget {
                         ? plotsProvider.plantaController.text
                         : plant.planta,
                     ctrl: plotsProvider.plantaController,
+                    disabled: !editable,
                   ),
                   if (isBiometrica ||
                       (!editable &&
@@ -202,6 +209,7 @@ class PlantPage extends StatelessWidget {
                       ctrl: plotsProvider.hojasVerdesController,
                       keyboardType: TextInputType.number,
                       maxLength: 10,
+                      disabled: !editable,
                     ),
                   if (isBiometrica ||
                       (!editable &&
@@ -215,6 +223,7 @@ class PlantPage extends StatelessWidget {
                       ctrl: plotsProvider.stpAnchoController,
                       keyboardType:
                           const TextInputType.numberWithOptions(decimal: true),
+                      disabled: !editable,
                     ),
                   if (isBiometrica ||
                       (!editable &&
@@ -228,6 +237,7 @@ class PlantPage extends StatelessWidget {
                       ctrl: plotsProvider.stpEspesorController,
                       keyboardType:
                           const TextInputType.numberWithOptions(decimal: true),
+                      disabled: !editable,
                     ),
                   if (isBiometrica ||
                       (!editable &&
@@ -241,6 +251,7 @@ class PlantPage extends StatelessWidget {
                       ctrl: plotsProvider.numeroFoliolosController,
                       keyboardType: TextInputType.number,
                       maxLength: 10,
+                      disabled: !editable,
                     ),
                   if (isBiometrica ||
                       (!editable &&
@@ -254,6 +265,7 @@ class PlantPage extends StatelessWidget {
                       ctrl: plotsProvider.largoFoliolosController,
                       keyboardType:
                           const TextInputType.numberWithOptions(decimal: true),
+                      disabled: !editable,
                     ),
                   if (isBiometrica ||
                       (!editable &&
@@ -267,6 +279,7 @@ class PlantPage extends StatelessWidget {
                       ctrl: plotsProvider.anchoFoliolosController,
                       keyboardType:
                           const TextInputType.numberWithOptions(decimal: true),
+                      disabled: !editable,
                     ),
                   if (isBiometrica && isID ||
                       (!editable &&
@@ -280,6 +293,7 @@ class PlantPage extends StatelessWidget {
                       ctrl: plotsProvider.longPecioloController,
                       keyboardType:
                           const TextInputType.numberWithOptions(decimal: true),
+                      disabled: !editable,
                     ),
                   if (isBiometrica && isID ||
                       (!editable &&
@@ -293,6 +307,7 @@ class PlantPage extends StatelessWidget {
                       ctrl: plotsProvider.longRaquizController,
                       keyboardType:
                           const TextInputType.numberWithOptions(decimal: true),
+                      disabled: !editable,
                     ),
                   if (isBiometrica && isID ||
                       (!editable &&
@@ -306,6 +321,7 @@ class PlantPage extends StatelessWidget {
                       ctrl: plotsProvider.alturaPlantaController,
                       keyboardType:
                           const TextInputType.numberWithOptions(decimal: true),
+                      disabled: !editable,
                     ),
                   if (isBiometrica && isID ||
                       (!editable &&
@@ -319,6 +335,7 @@ class PlantPage extends StatelessWidget {
                       ctrl: plotsProvider.longArqueoController,
                       keyboardType:
                           const TextInputType.numberWithOptions(decimal: true),
+                      disabled: !editable,
                     ),
                   if (isBiometrica && isID ||
                       (!editable &&
@@ -332,8 +349,10 @@ class PlantPage extends StatelessWidget {
                       ctrl: plotsProvider.circunferenciaController,
                       keyboardType:
                           const TextInputType.numberWithOptions(decimal: true),
+                      disabled: !editable,
                     ),
                   if (isBiometrica && isID ||
+                      isSuelo ||
                       (!editable &&
                           plant.deficienciaNutricional != null &&
                           plant.deficienciaNutricional!.isNotEmpty))
@@ -342,6 +361,7 @@ class PlantPage extends StatelessWidget {
                       value: plant.deficienciaNutricional != null
                           ? plant.deficienciaNutricional!.join(', ')
                           : '',
+                      disabled: !editable,
                       onTap: () async {
                         final items = await Dialogs.showMultiSelect(
                           context,
@@ -362,6 +382,7 @@ class PlantPage extends StatelessWidget {
                         ? plotsProvider.observacionController.text
                         : plant.observacion,
                     ctrl: plotsProvider.observacionController,
+                    disabled: !editable,
                   ),
                   const SizedBox(height: 15),
                   if (editable)
@@ -403,14 +424,12 @@ class PlantPage extends StatelessWidget {
       planta: plotsProvider.plantaController.text,
       linea: plotsProvider.lineaController.text,
     );
-
-    print(plantToSave);
-
     await plotsProvider.loadPlotReports();
     final reports = plotsProvider.plantReports;
     bool reportSaved = false;
     for (final plotReport in reports) {
-      if (plantToSave.id == plotReport.id) {
+      if ('${plantToSave.parcela} (Campaña ${plantToSave.campania})' ==
+          '${plotReport.plants[0].parcela} (Campaña ${plotReport.plants[0].campania})') {
         plotReport.plants.add(plantToSave);
         reportSaved = true;
       }

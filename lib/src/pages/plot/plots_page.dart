@@ -71,7 +71,7 @@ class _PlotsPageState extends State<PlotsPage> {
             children: [
               // if (showFilter) const Search(hintText: 'Buscar'),
               if (!widget.showFilter) const SizedBox(height: 30),
-              if (!widget.showFilter) titleLabel(),
+              titleLabel(),
               const SizedBox(height: 10),
               if (widget.editable) const CategoryLabel(),
               Expanded(
@@ -90,14 +90,16 @@ class _PlotsPageState extends State<PlotsPage> {
                                 // final hasGreen = !editable;
                                 return Column(
                                   children: [
-                                    labelCard(
-                                      label: plot.name ?? '',
-                                      verticalPadding: 16,
-                                      width: double.infinity,
-                                      color: hasGreen != -1
-                                          ? const Color(0xFF00C347)
-                                          : const Color(0xFFF92B77),
-                                    ),
+                                    if (plants.isNotEmpty)
+                                      labelCard(
+                                        label:
+                                            '${plants[0].parcela} (Campaña ${plants[0].campania})',
+                                        verticalPadding: 16,
+                                        width: double.infinity,
+                                        color: hasGreen != -1
+                                            ? const Color(0xFF00C347)
+                                            : const Color(0xFFF92B77),
+                                      ),
                                     const SizedBox(height: 10),
                                     listPlots(plot, plants),
                                   ],
@@ -116,16 +118,13 @@ class _PlotsPageState extends State<PlotsPage> {
     );
   }
 
-  Padding titleLabel() {
-    return const Padding(
-      padding: EdgeInsets.only(left: 20),
-      child: Text(
-        'Parcelas',
-        style: TextStyle(
-          fontSize: 30,
-          color: Color(0xFF242424),
-          fontWeight: FontWeight.bold,
-        ),
+  Widget titleLabel() {
+    return const Text(
+      'Parcelas inspeccionadas',
+      style: TextStyle(
+        fontSize: 26,
+        color: Color(0xFF242424),
+        fontWeight: FontWeight.bold,
       ),
     );
   }
