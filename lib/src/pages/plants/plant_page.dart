@@ -33,7 +33,6 @@ class PlantPage extends StatelessWidget {
     final plantsProvider = Provider.of<PlantsProvider>(context);
     final plotsProvider = Provider.of<PlotsProvider>(context, listen: false);
 
-    final isSuelo = plantsProvider.containsForName('Suelo');
     final isID = plantsProvider.containsForName('I+D');
     final isBiometrica = plantsProvider.containsForName('Biometría');
     plotsProvider.campaniaController.text = plant.campania!;
@@ -125,6 +124,13 @@ class PlantPage extends StatelessWidget {
                       value: plant.bloque,
                       disabled: !editable,
                       onTap: () async {
+                        if (plant.ensayo == null || plant.ensayo!.isEmpty) {
+                          Dialogs.nativeDialog(
+                            context: context,
+                            body: 'Debe seleccionar un ensayo',
+                          );
+                          return;
+                        }
                         String ensayo = plotsProvider.ensayo;
                         final dataDialog = ensayo == 'ASD' ||
                                 ensayo == 'Tres densidades y cuatro materiales'
@@ -157,6 +163,20 @@ class PlantPage extends StatelessWidget {
                       value: plant.tratamiento,
                       disabled: !editable,
                       onTap: () async {
+                        if (plant.ensayo == null || plant.ensayo!.isEmpty) {
+                          Dialogs.nativeDialog(
+                            context: context,
+                            body: 'Debe seleccionar un ensayo',
+                          );
+                          return;
+                        }
+                        if (plant.bloque == null || plant.bloque!.isEmpty) {
+                          Dialogs.nativeDialog(
+                            context: context,
+                            body: 'Debe seleccionar un bloque',
+                          );
+                          return;
+                        }
                         String ensayo = plotsProvider.ensayo;
                         final items = await Dialogs.showMultiSelect(context,
                             multiSelect: false,
@@ -351,8 +371,7 @@ class PlantPage extends StatelessWidget {
                           const TextInputType.numberWithOptions(decimal: true),
                       disabled: !editable,
                     ),
-                  if (isBiometrica && isID ||
-                      isSuelo ||
+                  if ((editable) ||
                       (!editable &&
                           plant.deficienciaNutricional != null &&
                           plant.deficienciaNutricional!.isNotEmpty))
