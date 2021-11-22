@@ -113,6 +113,9 @@ class PlantPage extends StatelessWidget {
                         plotsProvider.ensayo =
                             items == null ? '' : items.join('');
                         plant.ensayo = plotsProvider.ensayo;
+
+                        plant.bloque = null;
+                        plant.tratamiento = null;
                       },
                     ),
                   if (isID ||
@@ -152,6 +155,7 @@ class PlantPage extends StatelessWidget {
                         plotsProvider.bloque =
                             items == null ? '' : items.join('');
                         plant.bloque = plotsProvider.bloque;
+                        plant.tratamiento = null;
                       },
                     ),
                   if (isID ||
