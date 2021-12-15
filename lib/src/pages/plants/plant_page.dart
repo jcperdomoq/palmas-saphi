@@ -212,6 +212,7 @@ class PlantPage extends StatelessWidget {
                         : plant.linea,
                     ctrl: plotsProvider.lineaController,
                     disabled: !editable,
+                    keyboardType: TextInputType.number,
                   ),
                   LabelField(
                     label: 'Planta',
@@ -220,6 +221,7 @@ class PlantPage extends StatelessWidget {
                         : plant.planta,
                     ctrl: plotsProvider.plantaController,
                     disabled: !editable,
+                    keyboardType: TextInputType.number,
                   ),
                   if (isBiometrica ||
                       (!editable &&

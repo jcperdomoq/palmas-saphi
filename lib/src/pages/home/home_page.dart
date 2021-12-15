@@ -66,14 +66,14 @@ class HomePage extends StatelessWidget {
         .map((e) => e.name)
         .join('_');
 
-    if (areaCategory == 'Suelo' && evaluationCategory == 'Biometría') {
-      Dialogs.nativeDialog(
-        context: context,
-        body: 'Combinación de área y evaluación incorrecta',
-        acceptText: 'Aceptar',
-      );
-      return;
-    }
+    // if (areaCategory == 'Suelo' && evaluationCategory == 'Biometría') {
+    //   Dialogs.nativeDialog(
+    //     context: context,
+    //     body: 'Combinación de área y evaluación incorrecta',
+    //     acceptText: 'Aceptar',
+    //   );
+    //   return;
+    // }
     Provider.of<PlotsProvider>(context, listen: false).loadPeriodicData();
     Navigator.push(
       context,

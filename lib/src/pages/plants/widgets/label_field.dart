@@ -10,8 +10,9 @@ class LabelField extends StatelessWidget {
   final Function? onTap;
   final TextInputType? keyboardType;
   final int? maxLength;
+  final FocusNode _focusNode = FocusNode();
 
-  const LabelField({
+  LabelField({
     Key? key,
     required this.label,
     this.disabled = false,
@@ -33,6 +34,8 @@ class LabelField extends StatelessWidget {
           ? () {
               if (onTap != null) {
                 onTap!();
+              } else {
+                _focusNode.requestFocus();
               }
             }
           : null,
@@ -72,6 +75,7 @@ class LabelField extends StatelessWidget {
                 right: 10,
                 child: TextField(
                   controller: ctrl ?? TextEditingController(text: value),
+                  focusNode: _focusNode,
                   enabled: editable && !disabled,
                   keyboardType: keyboardType,
                   maxLength: maxLength,
